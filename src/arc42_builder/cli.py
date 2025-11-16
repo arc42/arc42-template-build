@@ -6,8 +6,8 @@ from .core.builder import BuildPipeline
 from .config.loader import ConfigLoader
 from .converters import list_converters
 
-# Default config path
-DEFAULT_CONFIG_PATH = Path("config/build.yaml")
+# Default config path inside the container
+DEFAULT_CONFIG_PATH = Path("/app/config/build.yaml")
 
 @click.group()
 @click.option('--config', 'config_path', type=click.Path(exists=True, path_type=Path), default=str(DEFAULT_CONFIG_PATH), help=f"Path to the build configuration file. Defaults to {DEFAULT_CONFIG_PATH}.")

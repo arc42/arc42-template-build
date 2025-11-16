@@ -1,10 +1,12 @@
 # arc42 Build System
 
-This repository contains the automated build system for the [arc42 template](https://github.com/arc42/arc42-template). It uses a Python-based orchestrator running inside a self-contained Docker container to generate the template in multiple languages and formats.
+This repository contains the automated build system for the [arc42 template](https://github.com/arc42/arc42-template). 
+It uses a Python-based orchestrator running inside a self-contained Docker container to generate the template in multiple languages and formats.
 
 ## Overview
 
-The goal of this build system is to provide a modern, maintainable, and reproducible way to generate all arc42 artifacts. It is designed to be run both locally by developers and in automated CI/CD pipelines.
+The goal of this build system is to provide a modern, maintainable, and reproducible way to generate all arc42-template artifacts. 
+It is designed to be run both locally by developers and in automated CI/CD pipelines.
 
 **Key Features:**
 - **Dockerized:** The entire toolchain, including all required fonts for every language, is packaged in a Docker image for maximum reproducibility.
