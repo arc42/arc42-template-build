@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./arc42-template:/workspace/arc42-template:ro
+      - ./workspace/build:/workspace/build
+      - ./workspace/dist:/workspace/dist
+      - ./workspace/logs:/workspace/logs
+      - ./src:/workspace/src:ro
+    working_dir: /workspace
+    command: python3 -m src.arc42_builder
+    
