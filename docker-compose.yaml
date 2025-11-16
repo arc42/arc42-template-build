@@ -1,16 +1,21 @@
-
-
 services:
   builder:
     build:
       context: .
       dockerfile: docker/Dockerfile
     volumes:
+      # Mount the template repository (read-only)
       - ./arc42-template:/workspace/arc42-template:ro
-      - ./workspace/build:/workspace/build
-      - ./workspace/dist:/workspace/dist
-      - ./workspace/logs:/workspace/logs
-      - ./src:/workspace/src:ro
-    working_dir: /workspace
-    command: python3 -m src.arc42_builder
-    
+      # Mount the configuration file (read-only)
+      - ./config/build.yaml:/app/config/build.yaml:ro
+      # Mount output directories (read-write)
+      - ./build:/workspace/build
+      - ./dist:/workspace/dist
+      - ./logs:/workspace/logs
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    # The command to run inside the container, passed to the ENTRYPOINT.
+    # Use `make build` to run this.
+    # To run with other arguments, use:
+    # docker-compose run --rm builder build --lang EN --format pdf
+    command: build --all

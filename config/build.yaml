@@ -1,0 +1,83 @@
+# Default build configuration for the arc42-build system
+version: "1.0"
+
+# Configuration for the template source repository
+template:
+  # The git repository to clone.
+  # This is ignored if a local path is provided and valid.
+  repository: "https://github.com/arc42/arc42-template.git"
+  # The git ref (branch, tag, or commit hash) to check out.
+  ref: "main"
+  # Local path to the template repository. If this directory exists,
+  # the repository setting above is ignored.
+  path: "./arc42-template"
+
+# A list of languages to build.
+# Must correspond to a top-level directory in the template repository.
+languages:
+  - EN
+  - DE
+  # - FR
+  # - ES
+  # - IT
+  # - NL
+  # - PT
+  # - RU
+  # - UKR
+  # - CZ
+  # - ZH
+
+# Configuration for each output format.
+formats:
+  html:
+    enabled: true
+    priority: 1
+    options:
+      single_page: true
+  pdf:
+    enabled: true
+    priority: 1
+    options:
+      page_size: "A4"
+      use_language_themes: true
+  docx:
+    enabled: true
+    priority: 1
+    options: {}
+  markdown:
+    enabled: true
+    priority: 1
+    options:
+      variant: "gfm" # GitHub-Flavored Markdown
+      multi_page: false # If true, generates one .md file per chapter
+  asciidoc:
+    enabled: true
+    priority: 1
+    options:
+      bundle_includes: true # Creates a single, self-contained .adoc file
+
+# A list of content flavors to generate for each language and format.
+flavors:
+  - plain
+  - withHelp
+
+# General build process options
+build:
+  # Run conversions in parallel for speed.
+  parallel: true
+  # Number of parallel worker processes.
+  max_workers: 4
+  # Run validation checks before starting the build.
+  validate: true
+  # Clean the build, dist, and temp directories before starting.
+  clean_before: true
+  # Create ZIP archives of the output directories.
+  create_zips: false # Disabled for now
+  # Verify that required fonts are present in the container at startup.
+  verify_fonts: true
+
+# Logging configuration
+logging:
+  level: "INFO" # Can be DEBUG, INFO, WARNING, ERROR
+  file: true    # If true, writes logs to a file in the logs/ directory
+  console: true # If true, prints logs to the console

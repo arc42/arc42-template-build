@@ -15,7 +15,7 @@ ifeq ($(DOCKER_COMPOSE),)
 endif
 
 # Phony targets prevent conflicts with files of the same name.
-.PHONY: all build update-submodule help
+.PHONY: all build update-submodule clean help
 
 # The default target executed when you run `make`.
 all: build
@@ -28,6 +28,7 @@ help:
 	@echo "  all                - (Default) Alias for 'build'."
 	@echo "  build              - Build the Docker image and run the main build process to generate templates."
 	@echo "  update-submodule   - Initializes and/or updates the 'arc42-template' git submodule."
+	@echo "  clean              - Removes all generated build artifacts and log files."
 	@echo ""
 	@echo "Example:"
 	@echo "  make build         - Runs the complete build process."
@@ -39,7 +40,7 @@ build:
 	$(DOCKER_COMPOSE) build builder
 	@echo "--> Running the build process inside Docker..."
 	$(DOCKER_COMPOSE) run --rm builder
-	@echo "--> Build finished. Check the 'workspace/build' directory for artifacts."
+	@echo "--> Build finished. Check the 'build' directory for artifacts."
 
 # Update the git submodule.
 update-submodule:
@@ -47,3 +48,8 @@ update-submodule:
 	git submodule update --init --recursive
 	@echo "--> Submodule update complete."
 
+# Clean up the workspace.
+clean:
+	@echo "--> Cleaning up build artifacts and logs..."
+	rm -rf build dist logs temp
+	@echo "--> Cleanup complete."
