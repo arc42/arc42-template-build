@@ -50,6 +50,7 @@ def build_html(source_dir, output_dir, lang, version_props):
     cmd = [
         "asciidoctor",
         "-b", "html5",
+        "-a", "imagesdir=/workspace/arc42-template/images",
         "-a", f"revnumber={version_props.get('revnumber', '')}",
         "-a", f"revdate={version_props.get('revdate', '')}",
         "-o", str(output_file),
@@ -62,6 +63,7 @@ def build_pdf(source_dir, output_dir, lang, version_props):
     output_file = output_dir / f"arc42-template-{lang}-withHelp.pdf"
     cmd = [
         "asciidoctor-pdf",
+        "-a", "imagesdir=/workspace/arc42-template/images",
         "-a", f"revnumber={version_props.get('revnumber', '')}",
         "-a", f"revdate={version_props.get('revdate', '')}",
         "-o", str(output_file),
@@ -76,6 +78,7 @@ def build_docx(source_dir, output_dir, lang, version_props):
     cmd_html = [
         "asciidoctor",
         "-b", "html5",
+        "-a", "imagesdir=/workspace/arc42-template/images",
         "-a", f"revnumber={version_props.get('revnumber', '')}",
         "-a", f"revdate={version_props.get('revdate', '')}",
         "-o", str(temp_html),
