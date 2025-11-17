@@ -26,10 +26,6 @@ class AsciidocConverter(ConverterPlugin):
     def convert(self, context: BuildContext) -> Path:
         output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.adoc"
 
-        # Determine the images directory path
-        # Images are in the template root, not in the language-specific directory
-        images_dir = context.source_dir.parent.parent / "images"
-
         # We use the 'docbook' backend as a way to get Asciidoctor to process
         # all includes and conditionals, then we capture the output.
         cmd = [
@@ -37,8 +33,6 @@ class AsciidocConverter(ConverterPlugin):
             "--no-header-footer",
             "-b", "docbook",
             "-a", f"flavor={context.flavor}",
-            # Fix image paths - override imagesdir to point to actual images location
-            "-a", f"imagesdir={images_dir}",
             str(context.source_dir / "arc42-template.adoc"),
             "-o", "-"  # Output to stdout
         ]

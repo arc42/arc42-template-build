@@ -26,10 +26,6 @@ class PdfConverter(ConverterPlugin):
     def convert(self, context: BuildContext) -> Path:
         output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.pdf"
 
-        # Determine the images directory path
-        # Images are in the template root, not in the language-specific directory
-        images_dir = context.source_dir.parent.parent / "images"
-
         cmd = [
             "asciidoctor-pdf",
             "-b", "pdf",
@@ -41,9 +37,7 @@ class PdfConverter(ConverterPlugin):
             'revnumber': context.version_props.get('revnumber', ''),
             'revdate': context.version_props.get('revdate', ''),
             'revremark': context.version_props.get('revremark', ''),
-            'flavor': context.flavor,
-            # Fix image paths - override imagesdir to point to actual images location
-            'imagesdir': str(images_dir)
+            'flavor': context.flavor
         }
         
         if context.flavor == "withHelp":

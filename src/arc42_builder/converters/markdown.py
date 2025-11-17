@@ -33,10 +33,6 @@ class MarkdownConverter(ConverterPlugin):
         main_adoc_file = context.source_dir / "arc42-template.adoc"
         variant = context.config.get("variant", "gfm") # GitHub-Flavored Markdown
 
-        # Determine the images directory path
-        # Images are in the template root, not in the language-specific directory
-        images_dir = context.source_dir.parent.parent / "images"
-
         # Create a temporary HTML file via Asciidoctor
         temp_html_file = context.output_dir / f"temp-{context.language}-{context.flavor}.html"
 
@@ -44,8 +40,6 @@ class MarkdownConverter(ConverterPlugin):
             "asciidoctor",
             "-b", "html5",
             "-a", f"flavor={context.flavor}",
-            # Fix image paths - override imagesdir to point to actual images location
-            "-a", f"imagesdir={images_dir}",
             str(main_adoc_file),
             "-o", str(temp_html_file)
         ]
@@ -61,9 +55,7 @@ class MarkdownConverter(ConverterPlugin):
             str(temp_html_file),
             "-f", "html",
             "-t", variant,
-            "-o", str(output_file),
-            # Add resource path for images - use the actual images directory
-            "--resource-path", str(images_dir)
+            "-o", str(output_file)
         ]
         
         logger.debug(f"Executing Pandoc for Markdown conversion: {' '.join(pandoc_cmd)}")
