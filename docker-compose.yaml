@@ -1,5 +1,6 @@
 services:
   builder:
+    container_name: arc42-template-builder
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -9,9 +10,9 @@ services:
       # Mount the configuration file (read-only)
       - ./config/build.yaml:/app/config/build.yaml:ro
       # Mount output directories (read-write)
-      - ./build:/workspace/build
-      - ./dist:/workspace/dist
-      - ./logs:/workspace/logs
+      - ./workspace/build:/workspace/build
+      - ./workspace/dist:/workspace/dist
+      - ./workspace/logs:/workspace/logs
     environment:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     # The command to run inside the container, passed to the ENTRYPOINT.

@@ -77,7 +77,7 @@ class Validator:
         """
         Verify all required fonts are installed in the container.
         """
-        if not self.config.build.get("verify_fonts", True):
+        if not self.config.build.verify_fonts:
             logger.warning("Skipping font verification.")
             return
 

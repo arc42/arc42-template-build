@@ -52,14 +52,19 @@ class BuildPipeline:
         #     self.packager.create_packages(successful_builds)
 
     def _clean_workspace(self):
-        """Removes build, dist, and temp directories."""
-        logger.info("Cleaning workspace...")
+        """Cleans the contents of build, dist, and temp directories."""
+        logger.info("Cleaning workspace contents...")
         for dir_name in ["build", "dist", "temp"]:
             dir_path = Path(dir_name)
-            if dir_path.exists():
-                logger.debug(f"Removing directory: {dir_path}")
-                shutil.rmtree(dir_path)
-        Path("temp").mkdir(exist_ok=True)
+            if dir_path.exists() and dir_path.is_dir():
+                logger.debug(f"Cleaning directory: {dir_path}")
+                for item in dir_path.iterdir():
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        item.unlink()
+            # Ensure directories exist for the build
+            dir_path.mkdir(exist_ok=True)
 
 
     def _generate_build_matrix(self) -> List[Dict[str, Any]]:

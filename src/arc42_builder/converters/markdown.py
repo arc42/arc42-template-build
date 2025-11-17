@@ -55,7 +55,8 @@ class MarkdownConverter(ConverterPlugin):
             str(temp_html_file),
             "-f", "html",
             "-t", variant,
-            "-o", str(output_file)
+            "-o", str(output_file),
+            "--resource-path", "/workspace/arc42-template/images" # Add resource path for images
         ]
         
         logger.debug(f"Executing Pandoc for Markdown conversion: {' '.join(pandoc_cmd)}")

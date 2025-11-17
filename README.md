@@ -42,7 +42,7 @@ It is designed to be run both locally by developers and in automated CI/CD pipel
     ```
 
 4.  **Find the artifacts:**
-    Generated files will be placed in the `build/` directory, organized by language and flavor.
+    Generated files will be placed in the `workspace/build/` directory, organized by language and flavor.
 
 ## Makefile Targets
 
@@ -50,6 +50,7 @@ This project uses a `Makefile` to simplify common operations.
 
 - `make build`: (Default) Builds the Docker image and runs the container to generate all configured artifacts.
 - `make update-submodule`: Initializes or updates the `arc42-template` git submodule. Run this after cloning or to get the latest template changes.
+- `make check`: Verifies the project setup and the status of the `arc42-template` submodule.
 - `make clean`: Removes all generated files and logs (`build/`, `dist/`, `logs/`, `temp/`).
 - `make help`: Displays a list of all available targets.
 
