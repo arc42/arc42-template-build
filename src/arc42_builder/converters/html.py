@@ -36,7 +36,6 @@ class HtmlConverter(ConverterPlugin):
             "-a", f"revremark={context.version_props.get('revremark', '')}",
             # Pass flavor as an attribute for AsciiDoc's conditional processing
             "-a", f"flavor={context.flavor}",
-            "-D", str(context.output_dir),
             "-o", str(output_file),
             str(context.source_dir / "arc42-template.adoc")
         ]
