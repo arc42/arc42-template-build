@@ -29,7 +29,6 @@ class PdfConverter(ConverterPlugin):
         cmd = [
             "asciidoctor-pdf",
             "-b", "pdf",
-            "-D", str(context.output_dir),
             "-o", str(output_file)
         ]
 
