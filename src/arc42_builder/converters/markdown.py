@@ -29,12 +29,12 @@ class MarkdownConverter(ConverterPlugin):
         return self._convert_single_file(context)
 
     def _convert_single_file(self, context: BuildContext) -> Path:
-        output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.md"
+        output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.md").absolute()
         main_adoc_file = context.source_dir / "arc42-template.adoc"
         variant = context.config.get("variant", "gfm") # GitHub-Flavored Markdown
 
         # Create a temporary HTML file via Asciidoctor
-        temp_html_file = context.output_dir / f"temp-{context.language}-{context.flavor}.html"
+        temp_html_file = (context.output_dir / f"temp-{context.language}-{context.flavor}.html").absolute()
 
         # Set absolute path to images directory
         images_dir = context.source_dir / "images"

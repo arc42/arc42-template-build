@@ -19,14 +19,14 @@ class DocxConverter(ConverterPlugin):
             return False
 
     def convert(self, context: BuildContext) -> Path:
-        output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.docx"
+        output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.docx").absolute()
         main_adoc_file = context.source_dir / "arc42-template.adoc"
 
         # Pandoc works best converting from a single file. We first let Asciidoctor
         # create a single intermediate HTML file, then convert that to DOCX.
 
         # Create a temporary HTML file
-        temp_html_file = context.output_dir / f"temp-{context.language}-{context.flavor}.html"
+        temp_html_file = (context.output_dir / f"temp-{context.language}-{context.flavor}.html").absolute()
 
         # Set absolute path to images directory
         images_dir = context.source_dir / "images"
