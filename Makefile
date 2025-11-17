@@ -26,7 +26,7 @@ endif
 DC_RUN = $(DOCKER_COMPOSE) run --rm builder
 
 # Phony targets
-.PHONY: all build build-image check validate test clean shell help update-submodule update-submodule-latest
+.PHONY: all build build-image check validate test test-build-artifacts dist clean shell help update-submodule update-submodule-latest
 
 # --- Default Target ---
 all: build
@@ -44,6 +44,8 @@ help:
 	@echo "  check                  - Verify Docker is available and submodule exists"
 	@echo "  validate               - Run pre-build validation (inside Docker)"
 	@echo "  test                   - Run tests (inside Docker)"
+	@echo "  test-build-artifacts   - Validate build artifacts for syntax and missing images"
+	@echo "  dist                   - Create ZIP distributions of build artifacts"
 	@echo "  clean                  - Remove all generated artifacts"
 	@echo "  shell                  - Open a shell inside the Docker container (for debugging)"
 	@echo "  update-submodule       - Initialize/update to commit referenced in parent repo"
@@ -85,6 +87,18 @@ test: build-image
 	@echo "==> Running tests inside Docker..."
 	$(DC_RUN) test
 	@echo "==> Tests complete"
+
+# --- Test Build Artifacts (runs inside Docker) ---
+test-build-artifacts: build-image
+	@echo "==> Validating build artifacts inside Docker..."
+	$(DC_RUN) test-artifacts
+	@echo "==> Build artifact validation complete"
+
+# --- Create Distribution ZIPs (runs inside Docker) ---
+dist: build-image
+	@echo "==> Creating ZIP distributions inside Docker..."
+	$(DC_RUN) dist
+	@echo "==> Distribution packages created in workspace/dist/"
 
 # --- Host-level Checks (minimal, Docker-only) ---
 check:

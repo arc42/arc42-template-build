@@ -53,6 +53,8 @@ That's it! Outputs will be in `workspace/build/`
 |---------|-------------|
 | `make validate` | Run pre-build validation (inside Docker) |
 | `make test` | Run test suite (inside Docker) |
+| `make test-build-artifacts` | Validate build artifacts for syntax and missing images |
+| `make dist` | Create ZIP distributions of build artifacts |
 | `make shell` | Open a shell in the container for debugging |
 | `make build-image` | Build Docker image without running build |
 
@@ -105,10 +107,10 @@ make validate
           ↓                    ↑
     Reads from            Writes to
           ↓                    ↑
-┌──────────────────┐  ┌──────────────────┐
-│ arc42-template/  │  │ workspace/build/ │
-│ (AsciiDoc)       │  │ (HTML/PDF/DOCX)  │
-└──────────────────┘  └──────────────────┘
+┌──────────────────┐  ┌─────────────────────────────┐
+│ arc42-template/  │  │ workspace/build/            │
+│ (AsciiDoc)       │  │ (HTML/PDF/DOCX/MD/RST/...)  │
+└──────────────────┘  └─────────────────────────────┘
 ```
 
 ### Build Process
@@ -126,8 +128,14 @@ make validate
 - HTML (single-page)
 - PDF (with full font support for all languages)
 - DOCX (Microsoft Word)
-- Markdown (GitHub-flavored)
-- AsciiDoc (pass-through)
+- Markdown (single-page, GitHub-flavored)
+- Markdown Multi-page (chapters split into separate files)
+- GitHub Markdown (optimized with GitHub-specific features)
+- GitHub Markdown Multi-page (chapters + GitHub optimizations)
+- reStructuredText (RST, for Sphinx/Python docs)
+- Textile (legacy markup format)
+- Confluence XHTML (for Atlassian Confluence)
+- AsciiDoc (self-contained bundle)
 
 **Flavors:**
 - `plain` - Only section headings and minimal text

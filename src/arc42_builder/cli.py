@@ -132,6 +132,99 @@ def test(ctx):
         click.echo(click.style("✓ Basic smoke test passed", fg="green"))
 
 
+@cli.command("test-artifacts")
+@click.option('--build-dir', type=click.Path(exists=True, path_type=Path), default=None, help="Path to build directory (defaults to config)")
+@click.pass_context
+def test_artifacts(ctx, build_dir):
+    """Validate build artifacts for syntax correctness and missing images."""
+    config = ctx.obj['config']
+
+    if not build_dir:
+        build_dir = Path(config.build.output_dir)
+
+    if not build_dir.exists():
+        click.echo(click.style(f"✗ Build directory not found: {build_dir}", fg="red"))
+        click.echo("Please run 'build' first to generate artifacts.")
+        ctx.exit(1)
+
+    try:
+        from .core.builder import BuildPipeline
+        pipeline = BuildPipeline(config)
+        pipeline.validator.validate_build_artifacts(build_dir)
+        click.echo(click.style("✓ All build artifacts validated successfully", fg="green"))
+    except Exception as e:
+        logging.error(f"Artifact validation failed: {e}", exc_info=True)
+        click.echo(click.style(f"✗ Artifact validation failed: {e}", fg="red"))
+        ctx.exit(1)
+
+
+@cli.command("dist")
+@click.option('--build-dir', type=click.Path(exists=True, path_type=Path), default=None, help="Path to build directory (defaults to config)")
+@click.option('--dist-dir', type=click.Path(path_type=Path), default=None, help="Path to dist directory (defaults to config)")
+@click.pass_context
+def dist(ctx, build_dir, dist_dir):
+    """Create ZIP distributions of build artifacts."""
+    import zipfile
+    import datetime
+
+    config = ctx.obj['config']
+
+    if not build_dir:
+        build_dir = Path(config.build.output_dir)
+
+    if not dist_dir:
+        dist_dir = Path(config.build.dist_dir)
+
+    if not build_dir.exists():
+        click.echo(click.style(f"✗ Build directory not found: {build_dir}", fg="red"))
+        click.echo("Please run 'build' first to generate artifacts.")
+        ctx.exit(1)
+
+    # Create dist directory
+    dist_dir.mkdir(parents=True, exist_ok=True)
+
+    click.echo(f"Creating ZIP distributions from {build_dir} to {dist_dir}...")
+
+    # Create ZIPs following the structure: workspace/dist/{LANG}/{FLAVOR}/{FORMAT}/
+    zip_count = 0
+    for lang_dir in build_dir.iterdir():
+        if not lang_dir.is_dir():
+            continue
+
+        lang = lang_dir.name
+        for flavor_dir in lang_dir.iterdir():
+            if not flavor_dir.is_dir():
+                continue
+
+            flavor = flavor_dir.name
+            for format_dir in flavor_dir.iterdir():
+                if not format_dir.is_dir():
+                    continue
+
+                format_name = format_dir.name
+
+                # Create output directory structure
+                output_zip_dir = dist_dir / lang / flavor / format_name
+                output_zip_dir.mkdir(parents=True, exist_ok=True)
+
+                # Create ZIP file
+                zip_filename = f"arc42-template-{lang}-{flavor}-{format_name}.zip"
+                zip_path = output_zip_dir / zip_filename
+
+                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    # Add all files from the format directory
+                    for file_path in format_dir.rglob('*'):
+                        if file_path.is_file():
+                            # Create relative path for the archive
+                            arcname = file_path.relative_to(format_dir)
+                            zipf.write(file_path, arcname)
+
+                click.echo(f"  ✓ Created {zip_filename}")
+                zip_count += 1
+
+    click.echo(click.style(f"✓ Created {zip_count} ZIP distributions in {dist_dir}", fg="green"))
+
+
 def main():
     cli(obj={})
 

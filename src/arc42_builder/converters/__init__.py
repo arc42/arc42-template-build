@@ -3,9 +3,14 @@ from .base import ConverterPlugin
 from .html import HtmlConverter
 from .pdf import PdfConverter
 from .asciidoc import AsciidocConverter
-# Import other converters here as they are created
 from .docx import DocxConverter
 from .markdown import MarkdownConverter
+from .markdown_mp import MarkdownMpConverter
+from .github_markdown import GithubMarkdownConverter
+from .github_markdown_mp import GithubMarkdownMpConverter
+from .rst import RstConverter
+from .textile import TextileConverter
+from .confluence import ConfluenceConverter
 
 # A registry of all available converter plugins
 # The key is the format name (e.g., 'html')
@@ -15,6 +20,12 @@ CONVERTERS: Dict[str, ConverterPlugin] = {
     "asciidoc": AsciidocConverter(),
     "docx": DocxConverter(),
     "markdown": MarkdownConverter(),
+    "markdown_mp": MarkdownMpConverter(),
+    "github_markdown": GithubMarkdownConverter(),
+    "github_markdown_mp": GithubMarkdownMpConverter(),
+    "rst": RstConverter(),
+    "textile": TextileConverter(),
+    "confluence": ConfluenceConverter(),
 }
 
 def get_converter(format_name: str) -> ConverterPlugin:

@@ -20,6 +20,12 @@ class Validator:
         self.verify_fonts_installed()
         logger.info("All validations passed.")
 
+    def validate_build_artifacts(self, build_dir: Path):
+        """Validate generated build artifacts for syntax and completeness."""
+        logger.info("Validating build artifacts...")
+        self.validate_markdown_artifacts(build_dir)
+        logger.info("Build artifact validation passed.")
+
     def validate_template_path(self):
         """Check if the template path exists and seems valid."""
         if not self.template_path.is_dir():
@@ -50,6 +56,7 @@ class Validator:
                 raise FileNotFoundError(f"Main AsciiDoc file not found for '{lang}' at: {main_adoc}")
             
             self._check_asciidoctor_references(main_adoc)
+            self._check_missing_images(lang_dir)
             logger.info(f"Language '{lang}' validation passed.")
 
     def _check_asciidoctor_references(self, adoc_file: Path):
@@ -109,3 +116,87 @@ class Validator:
                 f"Please ensure the Docker image was built correctly."
             )
         logger.info("All required fonts are installed.")
+
+    def _check_missing_images(self, lang_dir: Path):
+        """
+        Parse AsciiDoc files to find image references and verify they exist.
+        """
+        import re
+
+        logger.debug(f"Checking for missing images in {lang_dir}...")
+        images_dir = lang_dir / "images"
+
+        # If no images directory exists, that's fine - no images expected
+        if not images_dir.is_dir():
+            logger.debug(f"No images directory found at {images_dir}, skipping image checks")
+            return
+
+        # Find all .adoc files
+        adoc_files = list(lang_dir.glob("**/*.adoc"))
+
+        # Pattern to match image directives: image::path[] or image:path[]
+        image_pattern = re.compile(r'image::?([^\[\]]+)\[')
+
+        referenced_images = set()
+        for adoc_file in adoc_files:
+            with open(adoc_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                matches = image_pattern.findall(content)
+                referenced_images.update(matches)
+
+        # Check if referenced images exist
+        missing_images = []
+        for img_ref in referenced_images:
+            # Clean up the reference (remove any leading/trailing whitespace)
+            img_ref = img_ref.strip()
+
+            # Try both absolute and relative to images directory
+            img_path = lang_dir / img_ref
+            img_path_in_images = images_dir / img_ref
+
+            if not img_path.exists() and not img_path_in_images.exists():
+                missing_images.append(img_ref)
+
+        if missing_images:
+            logger.warning(
+                f"Missing image files in {lang_dir}:\n  " +
+                "\n  ".join(missing_images)
+            )
+            # Note: We warn but don't fail, as some images might be optional
+        else:
+            logger.debug(f"All {len(referenced_images)} referenced images found")
+
+    def validate_markdown_artifacts(self, build_dir: Path):
+        """
+        Validate Markdown files for syntax correctness.
+        Uses Pandoc to validate the syntax.
+        """
+        logger.info("Validating Markdown artifacts...")
+
+        md_files = list(build_dir.glob("**/*.md"))
+
+        if not md_files:
+            logger.warning("No Markdown files found to validate")
+            return
+
+        errors = []
+        for md_file in md_files:
+            try:
+                # Try to parse the Markdown file with Pandoc
+                result = subprocess.run(
+                    ["pandoc", str(md_file), "-t", "html", "-o", "/dev/null"],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+            except subprocess.CalledProcessError as e:
+                errors.append(f"{md_file.name}: {e.stderr}")
+                logger.error(f"Markdown validation failed for {md_file}: {e.stderr}")
+
+        if errors:
+            raise ValueError(
+                f"Markdown validation failed for {len(errors)} file(s):\n" +
+                "\n".join(errors)
+            )
+
+        logger.info(f"All {len(md_files)} Markdown files validated successfully")

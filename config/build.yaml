@@ -67,6 +67,13 @@ formats:
       # Single file or multi-page (one per chapter)
       multi_page: false
 
+  markdown_mp:
+    enabled: true
+    priority: 1
+    options:
+      # Multi-page Markdown (one file per chapter)
+      variant: "gfm"
+
   asciidoc:
     enabled: true
     priority: 1
@@ -76,7 +83,7 @@ formats:
 
   # Priority 2 formats
   github_markdown:
-    enabled: false
+    enabled: true
     priority: 2
     options:
       variant: "gfm"
@@ -84,8 +91,15 @@ formats:
       # GitHub-specific adjustments for links/anchors
       optimize_for_github: true
 
+  github_markdown_mp:
+    enabled: true
+    priority: 2
+    options:
+      # Multi-page GitHub Markdown with GitHub-specific optimizations
+      optimize_for_github: true
+
   confluence:
-    enabled: false
+    enabled: true
     priority: 2
     options: {}
       # Confluence-specific XHTML dialect
@@ -93,21 +107,21 @@ formats:
       # parent_page_id: ""
 
   # Priority 3 formats
+  rst:
+    enabled: true
+    priority: 3
+    options: {}
+
+  textile:
+    enabled: true
+    priority: 3
+    options: {}
+
   latex:
     enabled: false
     priority: 3
     options:
       document_class: "article"
-
-  rst:
-    enabled: false
-    priority: 3
-    options: {}
-
-  textile:
-    enabled: false
-    priority: 3
-    options: {}
 
 # Content flavors
 # plain: only section headings, minimal intro
