@@ -24,7 +24,7 @@ class PdfConverter(ConverterPlugin):
             return False
 
     def convert(self, context: BuildContext) -> Path:
-        output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.pdf"
+        output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.pdf").absolute()
 
         cmd = [
             "asciidoctor-pdf",

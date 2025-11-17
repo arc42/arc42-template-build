@@ -24,7 +24,7 @@ class AsciidocConverter(ConverterPlugin):
             return False
 
     def convert(self, context: BuildContext) -> Path:
-        output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.adoc"
+        output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.adoc").absolute()
 
         # We use the 'docbook' backend as a way to get Asciidoctor to process
         # all includes and conditionals, then we capture the output.

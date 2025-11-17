@@ -25,7 +25,7 @@ class HtmlConverter(ConverterPlugin):
             return False
     
     def convert(self, context: BuildContext) -> Path:
-        output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.html"
+        output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.html").absolute()
 
         # Build asciidoctor command
         cmd = [
