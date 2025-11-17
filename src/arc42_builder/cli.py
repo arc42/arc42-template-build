@@ -84,6 +84,54 @@ def list_formats_command():
     for name, converter in list_converters().items():
         click.echo(f"  - {name} (priority: {converter.priority})")
 
+
+@cli.command()
+@click.pass_context
+def test(ctx):
+    """Run test suite (if tests exist) or smoke tests."""
+    import subprocess
+    import sys
+
+    click.echo("Running tests...")
+
+    # Try to run pytest if available
+    try:
+        result = subprocess.run(
+            ["pytest", "/app/tests", "-v"],
+            capture_output=True,
+            text=True
+        )
+        click.echo(result.stdout)
+        if result.stderr:
+            click.echo(result.stderr, err=True)
+
+        if result.returncode == 0:
+            click.echo(click.style("✓ All tests passed", fg="green"))
+        else:
+            click.echo(click.style("✗ Some tests failed", fg="red"))
+            ctx.exit(result.returncode)
+    except FileNotFoundError:
+        # pytest not found, run basic smoke test
+        click.echo("pytest not found, running basic smoke test...")
+
+        # Check that converters can be loaded
+        converters = list_converters()
+        if not converters:
+            click.echo(click.style("✗ No converters found", fg="red"))
+            ctx.exit(1)
+
+        click.echo(f"✓ Found {len(converters)} converters")
+
+        # Check that config can be loaded
+        config = ctx.obj.get('config')
+        if not config:
+            click.echo(click.style("✗ Config not loaded", fg="red"))
+            ctx.exit(1)
+
+        click.echo("✓ Configuration loaded")
+        click.echo(click.style("✓ Basic smoke test passed", fg="green"))
+
+
 def main():
     cli(obj={})
 
