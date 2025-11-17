@@ -87,7 +87,7 @@ formats:
   confluence:
     enabled: false
     priority: 2
-    options:
+    options: {}
       # Confluence-specific XHTML dialect
       # space_key: "ARC42"
       # parent_page_id: ""

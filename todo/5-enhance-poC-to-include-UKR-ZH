@@ -1,0 +1,7 @@
+## Enhance the current PoC
+
+1. add flavors, now we build withhelp and plain.
+2. add configuration, so that we can configure the natural languages we are building
+3. enhance the current implementation so we can build EN, DE, UKR and ZH.
+4. create a test-strategy under todo/6-test-strategy-claude.md, which contains detailed concepts and instructions on how to validate the build. It's important to validate that the correct fonts are used, all files are built that were configured for the build, all images are present.
+5. 
