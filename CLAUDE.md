@@ -12,7 +12,7 @@ This is the **arc42-template-build** repository, a proof-of-concept (PoC) for a 
 ## What is arc42?
 
 arc42 is a template for documenting software and system architecture. This repository builds that template in multiple:
-- **Languages**: Currently EN, DE (planned: FR, CZ, ES, IT, NL, PT, RU, UKR, ZH)
+- **Languages**: Currently EN, DE (available in submodule: CZ, ES, FR, IT, NL, PT, RU, UKR, ZH)
 - **Flavors**: `withHelp` (with guidance), `plain` (without guidance)
 - **Formats**: HTML, PDF, DOCX (planned: Markdown, Confluence, LaTeX, AsciiDoc)
 
@@ -353,6 +353,7 @@ See `todo/4-updated-solution-approach.md` for complete details. Key items:
 
 ---
 
-**Last Updated**: 2025-11-16
+**Last Updated**: 2025-11-17
+**arc42 Template Version**: 9.0 (submodule updated to commit f507ad6)
 **Maintainer**: arc42 team
 **License**: (See LICENSE file)
