@@ -26,7 +26,7 @@ endif
 DC_RUN = $(DOCKER_COMPOSE) run --rm builder
 
 # Phony targets
-.PHONY: all build build-image check validate test clean shell help update-submodule
+.PHONY: all build build-image check validate test clean shell help update-submodule update-submodule-latest
 
 # --- Default Target ---
 all: build
@@ -38,21 +38,25 @@ help:
 	@echo "Requirements: Docker (or Docker Compose) - nothing else!"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  all                - (Default) Runs 'build'"
-	@echo "  build              - Build Docker image and generate all templates"
-	@echo "  build-image        - Build Docker image only (no template generation)"
-	@echo "  check              - Verify Docker is available and submodule exists"
-	@echo "  validate           - Run pre-build validation (inside Docker)"
-	@echo "  test               - Run tests (inside Docker)"
-	@echo "  clean              - Remove all generated artifacts"
-	@echo "  shell              - Open a shell inside the Docker container (for debugging)"
-	@echo "  update-submodule   - Initialize/update git submodules"
+	@echo "  all                    - (Default) Runs 'build'"
+	@echo "  build                  - Build Docker image and generate all templates"
+	@echo "  build-image            - Build Docker image only (no template generation)"
+	@echo "  check                  - Verify Docker is available and submodule exists"
+	@echo "  validate               - Run pre-build validation (inside Docker)"
+	@echo "  test                   - Run tests (inside Docker)"
+	@echo "  clean                  - Remove all generated artifacts"
+	@echo "  shell                  - Open a shell inside the Docker container (for debugging)"
+	@echo "  update-submodule       - Initialize/update to commit referenced in parent repo"
+	@echo "  update-submodule-latest - Update to latest from branch (default: master)"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make build                    - Full build (all languages, formats, flavors)"
-	@echo "  make validate                 - Validate configuration and dependencies"
-	@echo "  make test                     - Run test suite"
-	@echo "  make shell                    - Debug inside container"
+	@echo "  make build                         - Full build (all languages, formats, flavors)"
+	@echo "  make validate                      - Validate configuration and dependencies"
+	@echo "  make test                          - Run test suite"
+	@echo "  make shell                         - Debug inside container"
+	@echo "  make update-submodule              - Safe update (no parent repo changes)"
+	@echo "  make update-submodule-latest       - Update to latest from master branch"
+	@echo "  make update-submodule-latest SUBMODULE_BRANCH=9.0-draft - Update to latest from specific branch"
 	@echo ""
 	@echo "Advanced (override docker compose command):"
 	@echo "  $(DC_RUN) build --lang EN --format pdf --flavor withHelp"
@@ -107,14 +111,59 @@ check:
 	@echo "==> Prerequisites check complete. Docker-only setup verified!"
 
 # --- Update Submodules ---
+# Updates submodule to the commit referenced in parent repo (safe, no changes to parent)
 update-submodule:
 	@echo "==> Initializing and updating git submodule..."
-	@if command -v git > /dev/null 2>&1; then \
-		git submodule update --init --recursive; \
-		echo "==> Submodule update complete"; \
-	else \
-		echo "[ERROR] Git not found. Please install git or run in a container with git."; \
+	@if ! command -v git > /dev/null 2>&1; then \
+		echo "[ERROR] Git not found. Please install git."; \
 		exit 1; \
+	fi
+	@# Try standard submodule update first
+	@if git submodule update --init --recursive 2>/dev/null; then \
+		echo "==> Submodule updated successfully to commit: $$(cd $(TEMPLATE_DIR) && git rev-parse --short HEAD)"; \
+	else \
+		echo "    [WARNING] Standard submodule update failed. Attempting recovery..."; \
+		echo "    [INFO] Removing and re-cloning submodule..."; \
+		rm -rf $(TEMPLATE_DIR); \
+		git submodule update --init --recursive || { \
+			echo "    [ERROR] Failed to initialize submodule. The referenced commit may not exist."; \
+			echo "    [HINT] Try 'make update-submodule-latest' to update to latest from master branch."; \
+			exit 1; \
+		}; \
+		echo "==> Submodule recovered and updated to commit: $$(cd $(TEMPLATE_DIR) && git rev-parse --short HEAD)"; \
+	fi
+
+# Updates submodule to latest commit from specified branch (updates parent repo reference)
+# Usage: make update-submodule-latest [BRANCH=master]
+SUBMODULE_BRANCH ?= master
+update-submodule-latest:
+	@echo "==> Updating submodule to latest from branch '$(SUBMODULE_BRANCH)'..."
+	@if ! command -v git > /dev/null 2>&1; then \
+		echo "[ERROR] Git not found. Please install git."; \
+		exit 1; \
+	fi
+	@# Ensure submodule is initialized
+	@if [ ! -d "$(TEMPLATE_DIR)/.git" ]; then \
+		echo "    [INFO] Submodule not initialized. Cloning..."; \
+		rm -rf $(TEMPLATE_DIR); \
+		git clone https://github.com/arc42/arc42-template.git $(TEMPLATE_DIR); \
+	fi
+	@# Show current commit
+	@echo "    [INFO] Current commit: $$(cd $(TEMPLATE_DIR) && git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+	@# Fetch and checkout latest from branch
+	@cd $(TEMPLATE_DIR) && \
+		git fetch origin $(SUBMODULE_BRANCH) && \
+		git checkout $(SUBMODULE_BRANCH) && \
+		git pull origin $(SUBMODULE_BRANCH) && \
+		echo "    [INFO] Updated to commit: $$(git rev-parse --short HEAD) ($$(git log -1 --format='%s'))"
+	@# Check if parent repo needs updating
+	@if git diff --quiet $(TEMPLATE_DIR); then \
+		echo "==> Submodule already at latest commit from $(SUBMODULE_BRANCH)"; \
+	else \
+		echo "    [INFO] Submodule reference changed in parent repo"; \
+		echo "    [ACTION REQUIRED] Stage and commit the change:"; \
+		echo "        git add $(TEMPLATE_DIR)"; \
+		echo "        git commit -m 'Update arc42-template submodule to latest from $(SUBMODULE_BRANCH)'"; \
 	fi
 
 # --- Clean ---

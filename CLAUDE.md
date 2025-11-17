@@ -276,8 +276,17 @@ python3 -m src.arc42_builder -l DE -l EN -f pdf  # EN+DE PDF only
 
 1. **Empty arc42-template/ directory**:
    ```bash
-   git submodule update --init --recursive
+   # Recommended: error-resistant update
+   make update-submodule
+
+   # Or if the referenced commit doesn't exist, update to latest
+   make update-submodule-latest
    ```
+
+   The `update-submodule` target automatically handles:
+   - First-time initialization
+   - Recovery from corrupted submodule
+   - Missing commit errors (with helpful hints)
 
 2. **Permission errors in workspace/**:
    - Check Docker volume mounts
@@ -337,7 +346,9 @@ See `todo/4-updated-solution-approach.md` for complete details. Key items:
 | Task | Command |
 |------|---------|
 | Full build | `make build` |
-| Update submodule | `make update-submodule` |
+| Update submodule (safe) | `make update-submodule` |
+| Update to latest from master | `make update-submodule-latest` |
+| Update to specific branch | `make update-submodule-latest SUBMODULE_BRANCH=branch-name` |
 | Test outputs | `./test.sh` |
 | Clean outputs | `rm -rf workspace/build/*` |
 | Enter container | `docker-compose run --rm builder bash` |

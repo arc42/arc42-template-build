@@ -56,6 +56,14 @@ That's it! Outputs will be in `workspace/build/`
 | `make shell` | Open a shell in the container for debugging |
 | `make build-image` | Build Docker image without running build |
 
+### Submodule Management
+
+| Command | Description |
+|---------|-------------|
+| `make update-submodule` | Update to commit referenced in parent repo (safe, recommended) |
+| `make update-submodule-latest` | Update to latest commit from master branch |
+| `make update-submodule-latest SUBMODULE_BRANCH=<branch>` | Update to latest from specific branch |
+
 ### Advanced Usage
 
 ```bash
@@ -338,9 +346,26 @@ The arc42 template itself is licensed separately - see https://arc42.org/license
 
 Install Docker: https://docs.docker.com/get-docker/
 
-### "Template submodule not initialized"
+### "Template submodule not initialized" or submodule errors
 
-Run: `make update-submodule`
+**First time setup:**
+```bash
+make update-submodule
+```
+
+**If the referenced commit doesn't exist or submodule is corrupted:**
+```bash
+# Safe: updates to latest from master and shows you what changed
+make update-submodule-latest
+
+# Or update to a specific branch
+make update-submodule-latest SUBMODULE_BRANCH=9.0-draft
+```
+
+The `update-submodule` target is error-resistant and will automatically:
+- Try standard git submodule update first
+- Fall back to re-cloning if the update fails
+- Provide helpful error messages if the referenced commit doesn't exist
 
 ### "Font missing" errors
 
