@@ -38,14 +38,51 @@ arc42-template-build/
 └── requirements.txt             # Python dependencies (click, pyyaml)
 ```
 
+## Expected arc42-template Directory Structure
+
+The build system expects the following directory structure within the `arc42-template/` submodule for each language:
+
+```
+arc42-template/{LANG}/
+├── arc42-template.adoc          # Main template file (root level)
+├── adoc/                         # All AsciiDoc content files
+│   ├── config.adoc              # Configuration (imagesdir: ../images)
+│   ├── about-arc42.adoc         # About section
+│   ├── 01_introduction_and_goals.adoc
+│   ├── 02_architecture_constraints.adoc
+│   ├── 03_context_and_scope.adoc
+│   ├── 04_solution_strategy.adoc
+│   ├── 05_building_block_view.adoc
+│   ├── 06_runtime_view.adoc
+│   ├── 07_deployment_view.adoc
+│   ├── 08_concepts.adoc
+│   ├── 09_architecture_decisions.adoc
+│   ├── 10_quality_requirements.adoc
+│   ├── 11_technical_risks.adoc
+│   └── 12_glossary.adoc
+├── images/                       # Language-specific diagrams
+│   ├── arc42-logo.png
+│   ├── 01_2_iso-25010-topics-{LANG}.drawio.png
+│   ├── 05_building_blocks-{LANG}.png
+│   ├── 08-concepts-{LANG}.drawio.png
+│   └── 10_stimulus.png
+└── version.properties            # Version metadata
+```
+
+**Key Points:**
+- **Flattened structure**: Previously `asciidoc/src/`, now just `adoc/`
+- **Main file at root**: `arc42-template.adoc` is at the language directory root
+- **Images path**: In `config.adoc`, set `:imagesdir: ../images` (relative from `adoc/` to `images/`)
+- **Version file**: `version.properties` stays at the language root
+
 ## Core Architecture
 
 ### Build Flow
 
-1. **Orchestrator** (`src/arc42_builder/cli.py`):
-   - Click-based CLI that accepts language and format options
-   - Iterates through build matrix (language × format combinations)
+1. **Orchestrator** (`src/arc42_builder/core/builder.py`):
+   - Iterates through build matrix (language × flavor × format combinations)
    - Loads version properties from `arc42-template/{LANG}/version.properties`
+   - Sets source_dir to `arc42-template/{LANG}/` (language root)
 
 2. **Format Builders**:
    - `build_html()`: Asciidoctor → HTML5

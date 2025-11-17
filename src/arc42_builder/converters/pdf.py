@@ -44,8 +44,8 @@ class PdfConverter(ConverterPlugin):
             attributes['show-help'] = ''
 
         # Logic for theme detection from the proposal
-        theme_yml_path = context.source_dir.parent / "pdf-theme" / f"{context.language.lower()}-theme.yml"
-        fonts_dir = context.source_dir.parent / "pdf-theme" / "fonts"
+        theme_yml_path = context.source_dir / "pdf-theme" / f"{context.language.lower()}-theme.yml"
+        fonts_dir = context.source_dir / "pdf-theme" / "fonts"
         
         if theme_yml_path.exists():
             logger.info(f"Loading PDF theme from {theme_yml_path}")

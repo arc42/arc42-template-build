@@ -110,7 +110,7 @@ class BuildPipeline:
         context = BuildContext(
             language=lang,
             flavor=flavor,
-            source_dir=self.template_path / lang / 'asciidoc',
+            source_dir=self.template_path / lang,
             output_dir=Path('build') / lang / flavor / format_name,
             version_props=self._load_version_props(lang),
             config=task['format_config'].options

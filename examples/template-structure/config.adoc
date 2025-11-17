@@ -1,0 +1,19 @@
+// asciidoc settings for arc42 template
+// ==================================
+//
+// This config.adoc file should be placed in: {LANG}/adoc/config.adoc
+//
+// Example language-specific configuration for EN (English):
+
+:toc-title: table of contents
+
+// enable table-of-contents
+:toc:
+
+// where are images located?
+// IMPORTANT: With the new flattened structure, images are at ../images
+// (config.adoc is in LANG/adoc/, images are in LANG/images/)
+:imagesdir: ../images
+
+// Enable arc42 help text (for withHelp flavor)
+:arc42help:
