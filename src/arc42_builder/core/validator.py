@@ -45,7 +45,7 @@ class Validator:
                 raise FileNotFoundError(f"Missing version.properties for '{lang}' at: {version_file}")
             
             # 2. Check for broken references
-            main_adoc = lang_dir / "asciidoc" / "arc42-template.adoc"
+            main_adoc = lang_dir / "arc42-template.adoc"
             if not main_adoc.is_file():
                 raise FileNotFoundError(f"Main AsciiDoc file not found for '{lang}' at: {main_adoc}")
             
