@@ -1,14 +1,17 @@
 # Makefile for arc42-template-build
 #
-# This Makefile provides a modern and flexible way to manage the build process.
+# This Makefile provides a Docker-only build system.
+# Requirements: Docker (or Docker Compose) - nothing else!
 #
+# Works in:
+# - Local development (Linux, macOS, Windows with Docker Desktop)
+# - GitHub Codespaces
+# - Any CI/CD system with Docker support
 
 # --- Configuration ---
-# Note: The template directory is currently hardcoded here for the 'check' target.
-# If you change it in config/build.yaml, you must also update it here.
 TEMPLATE_DIR = arc42-template
 
-# Use shell to find an available docker compose command
+# Detect docker compose command (handles both old and new syntax)
 DOCKER_COMPOSE ?= $(shell command -v docker-compose 2> /dev/null)
 ifeq ($(DOCKER_COMPOSE),)
 DOCKER_COMPOSE = $(shell command -v docker 2> /dev/null) compose
@@ -16,100 +19,112 @@ endif
 
 # Ensure we found a docker compose command
 ifeq ($(DOCKER_COMPOSE),)
-    $(error "docker-compose or docker compose not found. Please install Docker Compose.")
+    $(error "Docker Compose not found. Please install Docker: https://docs.docker.com/get-docker/")
 endif
 
-# Phony targets prevent conflicts with files of the same name.
-.PHONY: all build update-submodule clean check help
+# Docker Compose run command (removes container after execution)
+DC_RUN = $(DOCKER_COMPOSE) run --rm builder
 
-# The default target executed when you run `make`.
+# Phony targets
+.PHONY: all build build-image check validate test clean shell help update-submodule
+
+# --- Default Target ---
 all: build
 
-# Display help information.
+# --- Help ---
 help:
-	@echo "Usage: make [target]"
+	@echo "arc42-template-build - Docker-only build system"
+	@echo ""
+	@echo "Requirements: Docker (or Docker Compose) - nothing else!"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  all                - (Default) Alias for 'build'."
-	@echo "  build              - Build the Docker image and run the main build process to generate templates."
-	@echo "  update-submodule   - Initializes and/or updates the git submodule defined in config/build.yaml (e.g., arc42-template)."
-	@echo "  check              - Verifies the project setup and submodule status on the host."
-	@echo "  clean              - Removes all generated build artifacts and log files."
+	@echo "  all                - (Default) Runs 'build'"
+	@echo "  build              - Build Docker image and generate all templates"
+	@echo "  build-image        - Build Docker image only (no template generation)"
+	@echo "  check              - Verify Docker is available and submodule exists"
+	@echo "  validate           - Run pre-build validation (inside Docker)"
+	@echo "  test               - Run tests (inside Docker)"
+	@echo "  clean              - Remove all generated artifacts"
+	@echo "  shell              - Open a shell inside the Docker container (for debugging)"
+	@echo "  update-submodule   - Initialize/update git submodules"
 	@echo ""
-	@echo "Example:"
-	@echo "  make build         - Runs the complete build process."
+	@echo "Examples:"
+	@echo "  make build                    - Full build (all languages, formats, flavors)"
+	@echo "  make validate                 - Validate configuration and dependencies"
+	@echo "  make test                     - Run test suite"
+	@echo "  make shell                    - Debug inside container"
+	@echo ""
+	@echo "Advanced (override docker compose command):"
+	@echo "  $(DC_RUN) build --lang EN --format pdf --flavor withHelp"
 
+# --- Main Build Target ---
+build: check build-image
+	@echo "==> Running build process inside Docker container..."
+	$(DC_RUN)
+	@echo ""
+	@echo "==> Build complete! Outputs in workspace/build/"
 
-# Build the Docker image and then run the builder service.
-build:
-	@echo "--> Building Docker image for the builder service..."
+# --- Build Docker Image Only ---
+build-image:
+	@echo "==> Building Docker image..."
 	$(DOCKER_COMPOSE) build builder
-	@echo "--> Running the build process inside Docker..."
-	$(DOCKER_COMPOSE) run --rm builder
-	@echo "--> Build finished. Check the 'workspace/build' directory for artifacts."
+	@echo "==> Docker image built successfully"
 
-# Update the git submodule.
-update-submodule:
-	@echo "--> Initializing and updating git submodule..."
-	git submodule update --init --recursive
-	@echo "--> Submodule update complete."
+# --- Validation (runs inside Docker) ---
+validate: build-image
+	@echo "==> Running validation inside Docker..."
+	$(DC_RUN) validate
+	@echo "==> Validation complete"
 
-# Perform system and dependency checks on the host.
+# --- Tests (runs inside Docker) ---
+test: build-image
+	@echo "==> Running tests inside Docker..."
+	$(DC_RUN) test
+	@echo "==> Tests complete"
+
+# --- Host-level Checks (minimal, Docker-only) ---
 check:
-	@echo "--> Performing system checks on host..."
-	@FAIL=0; \
-	echo "    (Using template directory: $(TEMPLATE_DIR))"; \
-	REQUIRED_DIRS="$(TEMPLATE_DIR) docker src config"; \
-	for dir in $$REQUIRED_DIRS; do \
-		if [ -d "$$dir" ]; then \
-			echo "  [OK]      Directory '$$dir' found."; \
-		else \
-			echo "  [MISSING] Directory '$$dir' not found."; \
-			FAIL=1; \
-		fi; \
-	done; \
-	\
-	REQUIRED_FILES="docker-compose.yaml config/build.yaml Makefile"; \
-	for file in $$REQUIRED_FILES; do \
-		if [ -f "$$file" ]; then \
-			echo "  [OK]      File '$$file' found."; \
-		else \
-			echo "  [MISSING] File '$$file' not found."; \
-			FAIL=1; \
-		fi; \
-	done; \
-	\
-	if [ $$FAIL -eq 1 ]; then \
-		echo ""; \
-		echo "!!! System check failed. Please ensure all required files and directories are present."; \
-		exit 1; \
-	fi;
-	@echo ""
-	@echo "--> Checking submodule status ($(TEMPLATE_DIR))..."
-	@if [ ! -d "$(TEMPLATE_DIR)" ]; then \
-		echo "  [ERROR] Directory '$(TEMPLATE_DIR)' not found. Run 'make update-submodule'."; \
+	@echo "==> Checking prerequisites (host)..."
+	@echo "    [1/3] Checking Docker availability..."
+	@if ! command -v docker > /dev/null 2>&1; then \
+		echo "    [ERROR] Docker not found. Install from: https://docs.docker.com/get-docker/"; \
 		exit 1; \
 	fi
-	@if ! (cd $(TEMPLATE_DIR) && git rev-parse --is-inside-work-tree > /dev/null 2>&1); then \
-		echo "  [ERROR] '$(TEMPLATE_DIR)' is not a valid Git repository. Run 'make update-submodule'."; \
+	@echo "    [OK] Docker found: $$(docker --version)"
+	@echo "    [2/3] Checking Docker Compose availability..."
+	@if [ -z "$(DOCKER_COMPOSE)" ]; then \
+		echo "    [ERROR] Docker Compose not found."; \
 		exit 1; \
 	fi
-	@cd $(TEMPLATE_DIR) && \
-	git fetch > /dev/null 2>&1 && \
-	STATUS=$$(git status -uno) && \
-	if echo "$$STATUS" | grep -q "Your branch is up to date"; then \
-		echo "  [OK]      Submodule is up to date."; \
-	elif echo "$$STATUS" | grep -q "Your branch is behind"; then \
-		echo "  [WARNING] Submodule is behind origin. Run 'make update-submodule'."; \
+	@echo "    [OK] Docker Compose found"
+	@echo "    [3/3] Checking template submodule..."
+	@if [ ! -d "$(TEMPLATE_DIR)/.git" ]; then \
+		echo "    [WARNING] Template submodule not initialized. Run 'make update-submodule'."; \
 	else \
-		echo "  [INFO]    Submodule status: $$STATUS"; \
-	fi;
+		echo "    [OK] Template submodule present"; \
+	fi
 	@echo ""
-	@echo "--> System checks complete."
+	@echo "==> Prerequisites check complete. Docker-only setup verified!"
 
+# --- Update Submodules ---
+update-submodule:
+	@echo "==> Initializing and updating git submodule..."
+	@if command -v git > /dev/null 2>&1; then \
+		git submodule update --init --recursive; \
+		echo "==> Submodule update complete"; \
+	else \
+		echo "[ERROR] Git not found. Please install git or run in a container with git."; \
+		exit 1; \
+	fi
 
-# Clean up the workspace.
+# --- Clean ---
 clean:
-	@echo "--> Cleaning up build artifacts and logs..."
-	rm -rf workspace build dist logs temp
-	@echo "--> Cleanup complete."
+	@echo "==> Cleaning build artifacts..."
+	rm -rf workspace/build workspace/dist workspace/logs
+	@echo "==> Clean complete"
+
+# --- Shell (for debugging) ---
+shell: build-image
+	@echo "==> Opening shell in Docker container..."
+	@echo "    Tip: You can run 'python3 -m src.arc42_builder --help' inside"
+	$(DOCKER_COMPOSE) run --rm builder /bin/bash

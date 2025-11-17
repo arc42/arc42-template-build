@@ -1,0 +1,199 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "arc42 Build Configuration Schema",
+  "description": "Schema for validating arc42-build configuration files",
+  "type": "object",
+  "required": ["version", "template", "languages", "formats", "flavors"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Configuration file version",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "template": {
+      "type": "object",
+      "required": ["repository", "ref", "path"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "description": "Git repository URL for the template"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Git ref (branch, tag, commit) to use"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to template directory"
+        }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "description": "Languages to build",
+      "items": {
+        "type": "string",
+        "enum": ["EN", "DE", "FR", "CZ", "ES", "IT", "NL", "PT", "RU", "UKR", "ZH"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "formats": {
+      "type": "object",
+      "description": "Output format configurations",
+      "properties": {
+        "html": { "$ref": "#/definitions/formatConfig" },
+        "pdf": { "$ref": "#/definitions/formatConfig" },
+        "docx": { "$ref": "#/definitions/formatConfig" },
+        "markdown": { "$ref": "#/definitions/formatConfig" },
+        "asciidoc": { "$ref": "#/definitions/formatConfig" },
+        "github_markdown": { "$ref": "#/definitions/formatConfig" },
+        "confluence": { "$ref": "#/definitions/formatConfig" },
+        "latex": { "$ref": "#/definitions/formatConfig" },
+        "rst": { "$ref": "#/definitions/formatConfig" },
+        "textile": { "$ref": "#/definitions/formatConfig" }
+      },
+      "additionalProperties": false
+    },
+    "flavors": {
+      "type": "array",
+      "description": "Content flavors to build",
+      "items": {
+        "type": "string",
+        "enum": ["plain", "withHelp"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "build": {
+      "type": "object",
+      "description": "Build execution settings",
+      "properties": {
+        "parallel": {
+          "type": "boolean",
+          "description": "Enable parallel builds",
+          "default": true
+        },
+        "max_workers": {
+          "type": "integer",
+          "description": "Maximum parallel workers",
+          "minimum": 1,
+          "maximum": 32,
+          "default": 4
+        },
+        "validate": {
+          "type": "boolean",
+          "description": "Run validation before building",
+          "default": true
+        },
+        "clean_before": {
+          "type": "boolean",
+          "description": "Clean output directory before build",
+          "default": true
+        },
+        "create_zips": {
+          "type": "boolean",
+          "description": "Create ZIP archives for distribution",
+          "default": true
+        },
+        "verify_fonts": {
+          "type": "boolean",
+          "description": "Verify required fonts are installed",
+          "default": true
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "Output directory for build artifacts",
+          "default": "workspace/build"
+        },
+        "dist_dir": {
+          "type": "string",
+          "description": "Output directory for distribution ZIPs",
+          "default": "workspace/dist"
+        },
+        "log_dir": {
+          "type": "string",
+          "description": "Directory for log files",
+          "default": "workspace/logs"
+        }
+      }
+    },
+    "logging": {
+      "type": "object",
+      "description": "Logging configuration",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["DEBUG", "INFO", "WARNING", "ERROR"],
+          "default": "INFO"
+        },
+        "file": {
+          "type": "boolean",
+          "description": "Enable file logging",
+          "default": true
+        },
+        "console": {
+          "type": "boolean",
+          "description": "Enable console logging",
+          "default": true
+        },
+        "filename": {
+          "type": "string",
+          "description": "Log filename",
+          "default": "arc42-build.log"
+        }
+      }
+    },
+    "advanced": {
+      "type": "object",
+      "description": "Advanced build options",
+      "properties": {
+        "fail_fast": {
+          "type": "boolean",
+          "description": "Stop on first error",
+          "default": false
+        },
+        "retry_failed": {
+          "type": "boolean",
+          "description": "Retry failed conversions",
+          "default": false
+        },
+        "retry_count": {
+          "type": "integer",
+          "description": "Number of retry attempts",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 1
+        },
+        "continue_on_error": {
+          "type": "boolean",
+          "description": "Continue building if some artifacts fail",
+          "default": true
+        }
+      }
+    }
+  },
+  "definitions": {
+    "formatConfig": {
+      "type": "object",
+      "required": ["enabled", "priority"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this format is enabled"
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Build priority (1=highest)",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "options": {
+          "type": "object",
+          "description": "Format-specific options",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

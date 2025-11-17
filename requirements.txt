@@ -1,4 +1,23 @@
-click==8.1.0
-pyyaml==6.0
-pathlib
+# CLI framework
+click>=8.1.0
 
+# Configuration
+pyyaml>=6.0
+jsonschema>=4.17.0
+
+# Template processing
+jinja2>=3.1.0
+
+# Pretty console output and logging
+rich>=13.0.0
+
+# Environment configuration
+python-dotenv>=1.0.0
+
+# Git operations
+gitpython>=3.1.0
+
+# Testing (for development)
+pytest>=7.4.0
+pytest-docker>=2.0.0
+pytest-cov>=4.1.0

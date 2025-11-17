@@ -1,83 +1,155 @@
-# Default build configuration for the arc42-build system
+# arc42 Build Configuration
+# This file controls what gets built and how
+
 version: "1.0"
 
-# Configuration for the template source repository
+# Template repository configuration
 template:
-  # The git repository to clone.
-  # This is ignored if a local path is provided and valid.
+  # The git repository to clone (ignored if local path exists)
   repository: "https://github.com/arc42/arc42-template.git"
-  # The git ref (branch, tag, or commit hash) to check out.
+  # The git ref (branch, tag, or commit hash) to check out
   ref: "main"
-  # Local path to the template repository. If this directory exists,
-  # the repository setting above is ignored.
+  # Local path to the template repository
+  # If this directory exists, the repository setting above is ignored
   path: "./arc42-template"
 
-# A list of languages to build.
-# Must correspond to a top-level directory in the template repository.
+# Languages to build
+# Must correspond to a top-level directory in the template repository
+# Available: EN, DE, FR, CZ, ES, IT, NL, PT, RU, UKR, ZH
 languages:
   - EN
   - DE
+  # Uncomment to enable additional languages:
   # - FR
+  # - CZ
   # - ES
   # - IT
   # - NL
   # - PT
   # - RU
   # - UKR
-  # - CZ
   # - ZH
 
-# Configuration for each output format.
+# Output formats configuration
 formats:
+  # Priority 1 formats - required
   html:
     enabled: true
     priority: 1
     options:
       single_page: true
+      # Future: multi-page support
+      # split_by_chapter: false
+
   pdf:
     enabled: true
     priority: 1
     options:
       page_size: "A4"
+      # Use language-specific themes for proper font handling
       use_language_themes: true
+      # Optional: specify custom theme
+      # theme: "arc42-theme.yml"
+
   docx:
     enabled: true
     priority: 1
     options: {}
+      # Future: reference document for styling
+      # reference_doc: "arc42-reference.docx"
+
   markdown:
     enabled: true
     priority: 1
     options:
-      variant: "gfm" # GitHub-Flavored Markdown
-      multi_page: false # If true, generates one .md file per chapter
+      # GitHub Flavored Markdown
+      variant: "gfm"
+      # Single file or multi-page (one per chapter)
+      multi_page: false
+
   asciidoc:
     enabled: true
     priority: 1
     options:
-      bundle_includes: true # Creates a single, self-contained .adoc file
+      # Creates a single, self-contained .adoc file with all includes processed
+      bundle_includes: true
 
-# A list of content flavors to generate for each language and format.
+  # Priority 2 formats
+  github_markdown:
+    enabled: false
+    priority: 2
+    options:
+      variant: "gfm"
+      multi_page: false
+      # GitHub-specific adjustments for links/anchors
+      optimize_for_github: true
+
+  confluence:
+    enabled: false
+    priority: 2
+    options:
+      # Confluence-specific XHTML dialect
+      # space_key: "ARC42"
+      # parent_page_id: ""
+
+  # Priority 3 formats
+  latex:
+    enabled: false
+    priority: 3
+    options:
+      document_class: "article"
+
+  rst:
+    enabled: false
+    priority: 3
+    options: {}
+
+  textile:
+    enabled: false
+    priority: 3
+    options: {}
+
+# Content flavors
+# plain: only section headings, minimal intro
+# withHelp: full explanatory text
 flavors:
   - plain
   - withHelp
 
-# General build process options
+# Build execution settings
 build:
-  # Run conversions in parallel for speed.
+  # Enable parallel builds (recommended)
   parallel: true
-  # Number of parallel worker processes.
+  # Maximum parallel workers (adjust based on CPU)
   max_workers: 4
-  # Run validation checks before starting the build.
+  # Run validation before building
   validate: true
-  # Clean the build, dist, and temp directories before starting.
+  # Clean build directory before starting
   clean_before: true
-  # Create ZIP archives of the output directories.
-  create_zips: false # Disabled for now
-  # Verify that required fonts are present in the container at startup.
+  # Create ZIP archives for distribution
+  create_zips: false  # Disabled for now during development
+  # Verify required fonts are installed
   verify_fonts: true
+  # Output directories (relative to project root)
+  output_dir: "workspace/build"
+  dist_dir: "workspace/dist"
+  log_dir: "workspace/logs"
 
 # Logging configuration
 logging:
-  level: "INFO" # Can be DEBUG, INFO, WARNING, ERROR
-  file: true    # If true, writes logs to a file in the logs/ directory
-  console: true # If true, prints logs to the console
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: true     # Log to file
+  console: true  # Log to console
+  # Log file path (relative to log_dir)
+  filename: "arc42-build.log"
+
+# Advanced options
+advanced:
+  # Fail fast on first error or collect all errors
+  fail_fast: false
+  # Retry failed conversions
+  retry_failed: false
+  # Number of retry attempts
+  retry_count: 1
+  # Continue building even if some artifacts fail
+  continue_on_error: true
