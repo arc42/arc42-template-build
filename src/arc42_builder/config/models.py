@@ -199,3 +199,7 @@ class BuildContext:
     def get_format_option(self, key: str, default: Any = None) -> Any:
         """Get a format-specific option."""
         return self.config.get_option(key, default)
+
+
+# Compatibility alias for existing code
+BuildConfigOptions = BuildSettings

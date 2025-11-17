@@ -5,15 +5,30 @@ version: "1.0"
 
 # Template repository configuration
 template:
+  # The git repository to clone (ignored if local path exists)
   repository: "https://github.com/arc42/arc42-template.git"
+  # The git ref (branch, tag, or commit hash) to check out
   ref: "main"
-  # Path to template directory (relative or absolute)
-  # For submodule setup, use relative path
+  # Local path to the template repository
+  # If this directory exists, the repository setting above is ignored
   path: "./arc42-template"
 
 # Languages to build
+# Must correspond to a top-level directory in the template repository
 # Available: EN, DE, FR, CZ, ES, IT, NL, PT, RU, UKR, ZH
-languages: [EN, DE, FR, CZ, ES, IT, NL, PT, RU, UKR, ZH]
+languages:
+  - EN
+  - DE
+  # Uncomment to enable additional languages:
+  # - FR
+  # - CZ
+  # - ES
+  # - IT
+  # - NL
+  # - PT
+  # - RU
+  # - UKR
+  # - ZH
 
 # Output formats configuration
 formats:
@@ -97,7 +112,9 @@ formats:
 # Content flavors
 # plain: only section headings, minimal intro
 # withHelp: full explanatory text
-flavors: [plain, withHelp]
+flavors:
+  - plain
+  - withHelp
 
 # Build execution settings
 build:
@@ -110,10 +127,10 @@ build:
   # Clean build directory before starting
   clean_before: true
   # Create ZIP archives for distribution
-  create_zips: true
+  create_zips: false  # Disabled for now during development
   # Verify required fonts are installed
   verify_fonts: true
-  # Output directories
+  # Output directories (relative to project root)
   output_dir: "workspace/build"
   dist_dir: "workspace/dist"
   log_dir: "workspace/logs"

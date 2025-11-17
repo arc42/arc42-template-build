@@ -5,7 +5,9 @@ from .models import (
     BuildConfig,
     TemplateConfig,
     FormatConfig,
+    FormatOptions,
     BuildSettings,
+    BuildConfigOptions,  # Compatibility alias
     LoggingConfig,
     AdvancedSettings,
     BuildContext,
@@ -18,7 +20,9 @@ __all__ = [
     "BuildConfig",
     "TemplateConfig",
     "FormatConfig",
+    "FormatOptions",
     "BuildSettings",
+    "BuildConfigOptions",  # Compatibility alias
     "LoggingConfig",
     "AdvancedSettings",
     "BuildContext",
