@@ -28,10 +28,14 @@ class DocxConverter(ConverterPlugin):
         # Create a temporary HTML file
         temp_html_file = context.output_dir / f"temp-{context.language}-{context.flavor}.html"
 
+        # Set absolute path to images directory
+        images_dir = context.source_dir / "images"
+
         asciidoctor_cmd = [
             "asciidoctor",
             "-b", "html5",
             "-a", f"flavor={context.flavor}",
+            "-a", f"imagesdir={images_dir.absolute()}",
             str(main_adoc_file),
             "-o", str(temp_html_file)
         ]

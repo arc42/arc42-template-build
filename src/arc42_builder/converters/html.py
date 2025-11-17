@@ -27,6 +27,9 @@ class HtmlConverter(ConverterPlugin):
     def convert(self, context: BuildContext) -> Path:
         output_file = context.output_dir / f"arc42-template-{context.language}-{context.flavor}.html"
 
+        # Set absolute path to images directory
+        images_dir = context.source_dir / "images"
+
         # Build asciidoctor command
         cmd = [
             "asciidoctor",
@@ -36,11 +39,13 @@ class HtmlConverter(ConverterPlugin):
             "-a", f"revremark={context.version_props.get('revremark', '')}",
             # Pass flavor as an attribute for AsciiDoc's conditional processing
             "-a", f"flavor={context.flavor}",
+            # Set absolute path to images so they can be found regardless of output location
+            "-a", f"imagesdir={images_dir.absolute()}",
             "-D", str(context.output_dir),
             "-o", str(output_file),
             str(context.source_dir / "arc42-template.adoc")
         ]
-        
+
         # If flavor is 'withHelp', define the 'show-help' attribute.
         # The AsciiDoc source should use ifdef::show-help[] or ifeval::["{flavor}" == "withHelp"]
         if context.flavor == "withHelp":
