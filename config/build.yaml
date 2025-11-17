@@ -1,0 +1,138 @@
+# arc42 Build Configuration
+# This file controls what gets built and how
+
+version: "1.0"
+
+# Template repository configuration
+template:
+  repository: "https://github.com/arc42/arc42-template.git"
+  ref: "main"
+  # Path to template directory (relative or absolute)
+  # For submodule setup, use relative path
+  path: "./arc42-template"
+
+# Languages to build
+# Available: EN, DE, FR, CZ, ES, IT, NL, PT, RU, UKR, ZH
+languages: [EN, DE, FR, CZ, ES, IT, NL, PT, RU, UKR, ZH]
+
+# Output formats configuration
+formats:
+  # Priority 1 formats - required
+  html:
+    enabled: true
+    priority: 1
+    options:
+      single_page: true
+      # Future: multi-page support
+      # split_by_chapter: false
+
+  pdf:
+    enabled: true
+    priority: 1
+    options:
+      page_size: "A4"
+      # Use language-specific themes for proper font handling
+      use_language_themes: true
+      # Optional: specify custom theme
+      # theme: "arc42-theme.yml"
+
+  docx:
+    enabled: true
+    priority: 1
+    options: {}
+      # Future: reference document for styling
+      # reference_doc: "arc42-reference.docx"
+
+  markdown:
+    enabled: true
+    priority: 1
+    options:
+      # GitHub Flavored Markdown
+      variant: "gfm"
+      # Single file or multi-page (one per chapter)
+      multi_page: false
+
+  asciidoc:
+    enabled: true
+    priority: 1
+    options:
+      # Creates a single, self-contained .adoc file with all includes processed
+      bundle_includes: true
+
+  # Priority 2 formats
+  github_markdown:
+    enabled: false
+    priority: 2
+    options:
+      variant: "gfm"
+      multi_page: false
+      # GitHub-specific adjustments for links/anchors
+      optimize_for_github: true
+
+  confluence:
+    enabled: false
+    priority: 2
+    options:
+      # Confluence-specific XHTML dialect
+      # space_key: "ARC42"
+      # parent_page_id: ""
+
+  # Priority 3 formats
+  latex:
+    enabled: false
+    priority: 3
+    options:
+      document_class: "article"
+
+  rst:
+    enabled: false
+    priority: 3
+    options: {}
+
+  textile:
+    enabled: false
+    priority: 3
+    options: {}
+
+# Content flavors
+# plain: only section headings, minimal intro
+# withHelp: full explanatory text
+flavors: [plain, withHelp]
+
+# Build execution settings
+build:
+  # Enable parallel builds (recommended)
+  parallel: true
+  # Maximum parallel workers (adjust based on CPU)
+  max_workers: 4
+  # Run validation before building
+  validate: true
+  # Clean build directory before starting
+  clean_before: true
+  # Create ZIP archives for distribution
+  create_zips: true
+  # Verify required fonts are installed
+  verify_fonts: true
+  # Output directories
+  output_dir: "workspace/build"
+  dist_dir: "workspace/dist"
+  log_dir: "workspace/logs"
+
+# Logging configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: true     # Log to file
+  console: true  # Log to console
+  # Log file path (relative to log_dir)
+  filename: "arc42-build.log"
+
+# Advanced options
+advanced:
+  # Fail fast on first error or collect all errors
+  fail_fast: false
+  # Retry failed conversions
+  retry_failed: false
+  # Number of retry attempts
+  retry_count: 1
+  # Continue building even if some artifacts fail
+  continue_on_error: true

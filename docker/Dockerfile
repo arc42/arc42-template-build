@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y \
 RUN gem install asciidoctor:2.0.20 asciidoctor-pdf:2.3.10
 
 # Install Python dependencies
+# Note: requirements.txt is in parent directory, copied via build context
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
