@@ -95,7 +95,7 @@ arc42-template-build provides an automated, reproducible build system for genera
 
 ---
 
-## 3. Non-Functional Requirements
+## 3. Quality Requirements
 
 ### 3.1 Performance
 
