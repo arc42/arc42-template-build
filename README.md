@@ -318,13 +318,31 @@ docker compose run --rm builder build --all
 
 ---
 
-## 📝 Requirements & Design
+## 📚 Documentation
 
-Detailed documentation:
+Comprehensive documentation is available in the `docs/` directory:
 
-- **Requirements**: `todo/1-refined-arc42_build_process_requirements.md`
-- **Solution Approach**: `todo/4-updated-solution-approach.md`
-- **Implementation Notes**: `todo/5-configuration-system-implementation.md`
+### Core Documentation
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **[Architecture Documentation](docs/architecture-documentation.md)** | Complete arc42-style architecture documentation of the build system itself | Developers, Contributors |
+| **[Requirements Specification](docs/requirements.md)** | req42-style requirements with traceability | Project managers, Architects |
+| **[Future TODOs & Roadmap](docs/future-todos.md)** | Planned features, known issues, roadmap | Everyone |
+
+### Reference Documentation
+
+- **Original Requirements**: [`todo/1-refined-arc42_build_process_requirements.md`](todo/1-refined-arc42_build_process_requirements.md)
+- **Solution Approach**: [`todo/4-updated-solution-approach.md`](todo/4-updated-solution-approach.md)
+- **Implementation Notes**: [`todo/5-configuration-system-implementation.md`](todo/5-configuration-system-implementation.md)
+- **AI Assistant Guide**: [`CLAUDE.md`](CLAUDE.md) - For AI assistants working on this codebase
+
+### Quick Links
+
+- 🏛️ **How it works**: See [Architecture Documentation § 5-6](docs/architecture-documentation.md#5-building-block-view)
+- 🔌 **Adding new formats**: See [Architecture Documentation § 5.2](docs/architecture-documentation.md#level-2-converter-plugin-architecture)
+- 🚀 **What's next**: See [Future TODOs](docs/future-todos.md#roadmap)
+- ✅ **Requirements status**: See [Requirements § Acceptance Criteria](docs/requirements.md#9-acceptance-criteria)
 
 ---
 
