@@ -329,6 +329,7 @@ Comprehensive documentation is available in the `docs/` directory:
 | **[Architecture Documentation](docs/architecture-documentation.md)** | Complete arc42-style architecture documentation of the build system itself | Developers, Contributors |
 | **[Requirements Specification](docs/requirements.md)** | req42-style requirements with traceability | Project managers, Architects |
 | **[Future TODOs & Roadmap](docs/future-todos.md)** | Planned features, known issues, roadmap | Everyone |
+| **[ADRs (Architecture Decision Records)](docs/adrs/)** | 10 key architectural decisions in Nygard format | Architects, Developers |
 
 ### Reference Documentation
 
@@ -343,6 +344,7 @@ Comprehensive documentation is available in the `docs/` directory:
 - 🔌 **Adding new formats**: See [Architecture Documentation § 5.2](docs/architecture-documentation.md#level-2-converter-plugin-architecture)
 - 🚀 **What's next**: See [Future TODOs](docs/future-todos.md#roadmap)
 - ✅ **Requirements status**: See [Requirements § Acceptance Criteria](docs/requirements.md#9-acceptance-criteria)
+- 💡 **Why these choices**: See [ADRs](docs/adrs/) for architectural decisions
 
 ---
 

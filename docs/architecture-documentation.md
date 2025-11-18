@@ -460,84 +460,32 @@ fc-list : family  # Check installed fonts
 
 ## 9. Architecture Decisions
 
-### ADR-001: Two-Repository Model
+All architectural decisions are documented as separate ADRs (Architecture Decision Records) in the [`docs/adrs/`](adrs/) directory.
 
-**Status:** Accepted
+### Key Decisions Summary
 
-**Context:** Build logic could be in arc42-template repo or separate.
+| ADR | Decision | Rationale |
+|-----|----------|-----------|
+| [001](adrs/001-use-adrs-to-document-decisions.md) | Use ADRs | Preserve decision rationale for future reference |
+| [002](adrs/002-use-make-as-primary-interface.md) | Make as interface | Ubiquitous, simple, familiar to developers |
+| [003](adrs/003-use-python-for-orchestration.md) | Python orchestration | Readable, maintainable, excellent libraries |
+| [004](adrs/004-docker-only-execution.md) | Docker-only | Reproducibility, version control, zero host deps |
+| [005](adrs/005-two-repository-model.md) | Two-repository | Separation of content vs. build concerns |
+| [006](adrs/006-plugin-architecture-for-converters.md) | Plugin architecture | Easy to add formats, testable, maintainable |
+| [007](adrs/007-yaml-for-configuration.md) | YAML config | Human-readable, comments, widely supported |
+| [008](adrs/008-asciidoctor-pandoc-two-phase-conversion.md) | Two-phase conversion | Leverage strengths of both tools |
+| [009](adrs/009-parallel-builds-with-threadpool.md) | Parallel builds | 4x faster, configurable, good for I/O |
+| [010](adrs/010-validation-first-build-approach.md) | Validation-first | Fast failure, clear errors, developer feedback |
 
-**Decision:** Separate `arc42-template-build` repository.
+### ADR Format
 
-**Consequences:**
-- ✅ Clear separation of content vs. build concerns
-- ✅ Content translators don't need to understand build system
-- ✅ Build system can support multiple templates (arc42, req42)
-- ❌ Requires Git submodule management
+We use the [Nygard format](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions):
+- **Status**: Proposed, Accepted, Deprecated, Superseded
+- **Context**: The issue motivating the decision
+- **Decision**: What we chose
+- **Consequences**: Positive and negative results
 
----
-
-### ADR-002: Plugin Architecture for Converters
-
-**Status:** Accepted
-
-**Context:** Need extensible system for 10+ output formats.
-
-**Decision:** Abstract base class `ConverterPlugin` with registry pattern.
-
-**Consequences:**
-- ✅ New formats added by single file (e.g., `rst.py`)
-- ✅ Each converter encapsulates its dependencies
-- ✅ Easy to test converters independently
-- ⚠️ Slight indirection vs. monolithic script
-
----
-
-### ADR-003: Asciidoctor + Pandoc Two-Phase Conversion
-
-**Status:** Accepted
-
-**Context:** Need to generate many formats from AsciiDoc.
-
-**Decision:** AsciiDoc → HTML (via Asciidoctor) → Other formats (via Pandoc)
-
-**Consequences:**
-- ✅ Leverages Asciidoctor's excellent AsciiDoc support
-- ✅ Pandoc's wide format support (50+ formats)
-- ✅ Reliable, well-maintained tools
-- ❌ Some formats go through two conversions (quality loss possible)
-- ⚠️ Confluence uses dedicated asciidoctor-confluence
-
----
-
-### ADR-004: Docker-Only Execution
-
-**Status:** Accepted
-
-**Context:** Build requires Ruby, Python, Pandoc, fonts, etc.
-
-**Decision:** All builds run inside Docker container.
-
-**Consequences:**
-- ✅ Reproducible across Linux, macOS, Windows
-- ✅ Version-pinned dependencies (Dockerfile)
-- ✅ No "works on my machine" issues
-- ❌ Requires Docker installation (acceptable for target users)
-
----
-
-### ADR-005: YAML Configuration
-
-**Status:** Accepted
-
-**Context:** Need human-readable config for languages/formats.
-
-**Decision:** Use `config/build.yaml` as single source of truth.
-
-**Consequences:**
-- ✅ Easy to read and edit
-- ✅ Good YAML parsing libraries in Python
-- ✅ Supports comments for documentation
-- ✅ Can validate against JSON schema
+See [`docs/adrs/README.md`](adrs/README.md) for complete index and template
 
 ---
 
