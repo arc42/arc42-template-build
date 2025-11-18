@@ -456,6 +456,65 @@ required_fonts = ["Noto Sans", "Noto Sans CJK SC", "Liberation Sans"]
 fc-list : family  # Check installed fonts
 ```
 
+### Submodule Management
+
+The `arc42-template/` directory is a **Git submodule** containing the actual template content (AsciiDoc sources, images, version metadata).
+
+**Management Commands:**
+
+| Command | Purpose |
+|---------|---------|
+| `make submodule-status` | Show detailed status of submodule (commit, branch, changes) |
+| `make update-submodule` | Update to commit referenced in parent repo |
+| `make update-submodule-latest` | Update to latest from master branch |
+| `make submodule-push-help` | Display comprehensive guide for contributing changes |
+
+**Key Principles:**
+
+- **Detached HEAD is normal**: Submodules pin specific commits, not branches
+- **Two-repository separation**: Content (arc42-template) vs. build system (this repo)
+- **Fork-first contribution**: Contributors fork arc42-template, then create PRs
+- **Test before updating**: Always build after updating submodule reference
+
+**Detailed Documentation:**
+
+See [`readme.adoc`](../readme.adoc) for comprehensive submodule management guide including:
+- Understanding submodule concepts
+- Common workflows (status, update, contribute)
+- Troubleshooting scenarios
+- Best practices for content vs. build contributions
+
+**Example: Contributing a Translation Fix**
+
+```bash
+# 1. Check status
+make submodule-status
+
+# 2. Get workflow guide
+make submodule-push-help
+
+# 3. Fork arc42-template on GitHub
+
+# 4. Add fork as remote
+cd arc42-template
+git remote add myfork https://github.com/YOUR_USERNAME/arc42-template.git
+
+# 5. Create feature branch
+git checkout -b fix/german-typo
+
+# 6. Make changes, test build
+vim DE/src/05_building_block_view.adoc
+cd .. && make build
+
+# 7. Commit and push to fork
+cd arc42-template
+git add .
+git commit -m "Fix typo in German chapter 5"
+git push myfork fix/german-typo
+
+# 8. Create PR on GitHub
+```
+
 ---
 
 ## 9. Architecture Decisions
@@ -624,11 +683,16 @@ arc42-template-build/
 ├── docs/                        # Documentation
 │   ├── architecture-documentation.md  # This file
 │   ├── requirements.md          # req42-style requirements
-│   └── future-todos.md          # Planned improvements
+│   ├── future-todos.md          # Planned improvements
+│   └── adrs/                    # Architecture Decision Records
+│       ├── README.md            # ADR index and template
+│       ├── 001-*.md             # Individual ADRs
+│       └── ...
 ├── docker-compose.yaml
 ├── Makefile                     # Convenience wrapper
 ├── requirements.txt             # Python dependencies
-├── README.md                    # User guide
+├── README.md                    # User guide (Markdown)
+├── readme.adoc                  # Submodule management guide (AsciiDoc)
 └── CLAUDE.md                    # AI assistant guide
 ```
 

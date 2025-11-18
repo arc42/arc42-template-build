@@ -1,0 +1,419 @@
+= arc42-template-build: Submodule Management Guide
+:toc: left
+:toclevels: 3
+:sectnums:
+:icons: font
+
+== Overview
+
+This guide explains how to work with the `arc42-template` Git submodule in the arc42-template-build repository.
+
+The `arc42-template/` directory is a Git submodule pointing to https://github.com/arc42/arc42-template.git[arc42-template repository].
+
+== Quick Reference
+
+[cols="1,3"]
+|===
+| Command | Purpose
+
+| `make submodule-status`
+| Show detailed status of the arc42-template submodule
+
+| `make update-submodule`
+| Update to commit referenced in parent repo (safe, recommended)
+
+| `make update-submodule-latest`
+| Update to latest commit from master branch
+
+| `make submodule-push-help`
+| Show comprehensive guide for contributing changes back to arc42-template
+|===
+
+== Understanding Submodules
+
+=== What is a Git Submodule?
+
+A Git submodule is a repository embedded inside another repository. In our case:
+
+* **Parent repository**: `arc42-template-build` (this repo) - Contains build system
+* **Submodule**: `arc42-template` - Contains actual template content (AsciiDoc sources)
+
+=== Why Use a Submodule?
+
+* **Separation of concerns**: Content (arc42-template) vs. build logic (arc42-template-build)
+* **Independent development**: Template translators don't need to understand build system
+* **Version pinning**: Build repo pins specific commit of template for stability
+* **Reusable build system**: Same build system can support multiple templates (arc42, req42)
+
+== Common Workflows
+
+=== Workflow 1: Check Submodule Status
+
+[source,bash]
+----
+make submodule-status
+----
+
+This displays:
+
+* Current commit in submodule
+* Commit referenced by parent repo
+* Current branch (or detached HEAD state)
+* Remote URL
+* Working directory status (clean or modified)
+* Commits ahead/behind origin
+
+.Example Output
+----
+==> arc42-template Submodule Status
+
+[STATUS] Submodule initialized
+
+Current submodule commit:
+  f507ad6 - Update documentation (2 weeks ago)
+
+Referenced commit in parent repo:
+  f507ad6 (pinned in parent)
+
+Branch:
+  [detached HEAD state - normal for submodules]
+
+Remote:
+  https://github.com/arc42/arc42-template.git
+
+Working directory status:
+  Clean (no uncommitted changes)
+
+Commits ahead/behind origin:
+  N/A (detached HEAD state)
+----
+
+=== Workflow 2: Initial Submodule Setup
+
+When first cloning the build repository:
+
+[source,bash]
+----
+git clone https://github.com/arc42/arc42-template-build.git
+cd arc42-template-build
+make update-submodule
+----
+
+This initializes the submodule to the exact commit referenced by the parent repository.
+
+=== Workflow 3: Update Submodule to Latest
+
+To get the latest changes from arc42-template:
+
+[source,bash]
+----
+make update-submodule-latest
+----
+
+Or for a specific branch:
+
+[source,bash]
+----
+make update-submodule-latest SUBMODULE_BRANCH=9.0-draft
+----
+
+If the submodule reference changed, commit it:
+
+[source,bash]
+----
+git add arc42-template
+git commit -m "Update arc42-template submodule to latest from master"
+----
+
+=== Workflow 4: Contributing Content Changes
+
+If you want to contribute improvements to the arc42 template itself (translations, fixes, improvements):
+
+[source,bash]
+----
+make submodule-push-help
+----
+
+This displays a comprehensive step-by-step guide for:
+
+1. Forking the arc42-template repository
+2. Adding your fork as a remote
+3. Creating a feature branch
+4. Making and testing changes
+5. Committing and pushing to your fork
+6. Creating a Pull Request
+
+== Detailed Scenarios
+
+=== Scenario A: You Want to Build Templates
+
+**Goal**: Just build the current templates, no changes needed.
+
+[source,bash]
+----
+make update-submodule   # One-time setup
+make build              # Build all templates
+----
+
+You don't need to touch the submodule further.
+
+=== Scenario B: You Want to Test Build with Latest Template Content
+
+**Goal**: Test if build system works with latest arc42-template changes.
+
+[source,bash]
+----
+make update-submodule-latest
+make build
+make validate
+----
+
+If successful, commit the submodule update:
+
+[source,bash]
+----
+git add arc42-template
+git commit -m "Update arc42-template to latest"
+git push
+----
+
+=== Scenario C: You Want to Fix a Typo in German Translation
+
+**Goal**: Contribute a content fix back to arc42-template.
+
+.Step-by-Step
+1. **Check current status**
++
+[source,bash]
+----
+make submodule-status
+----
+
+2. **Get the full workflow guide**
++
+[source,bash]
+----
+make submodule-push-help
+----
+
+3. **Fork arc42-template** on GitHub
+
+4. **Add your fork as remote**
++
+[source,bash]
+----
+cd arc42-template
+git remote add myfork https://github.com/YOUR_USERNAME/arc42-template.git
+----
+
+5. **Create feature branch**
++
+[source,bash]
+----
+cd arc42-template
+git checkout -b fix/german-typo-chapter-5
+----
+
+6. **Make your changes**
++
+[source,bash]
+----
+# Edit DE/src/05_building_block_view.adoc
+vim DE/src/05_building_block_view.adoc
+----
+
+7. **Test the build**
++
+[source,bash]
+----
+cd ..  # Back to arc42-template-build root
+make build
+----
+
+8. **Commit in submodule**
++
+[source,bash]
+----
+cd arc42-template
+git add DE/src/05_building_block_view.adoc
+git commit -m "Fix typo in German chapter 5"
+----
+
+9. **Push to your fork**
++
+[source,bash]
+----
+git push myfork fix/german-typo-chapter-5
+----
+
+10. **Create Pull Request** on GitHub
+
+=== Scenario D: Submodule is in Weird State
+
+**Problem**: Submodule seems corrupted or out of sync.
+
+**Solution**: Use the recovery mechanism:
+
+[source,bash]
+----
+rm -rf arc42-template
+make update-submodule
+----
+
+This removes and re-clones the submodule cleanly.
+
+== Understanding Detached HEAD State
+
+When you run `make submodule-status`, you often see:
+
+----
+Branch:
+  [detached HEAD state - normal for submodules]
+----
+
+*This is normal and expected!*
+
+=== Why Detached HEAD?
+
+Submodules are pinned to specific commits, not branches. When the parent repo says "use commit abc123", Git checks out that exact commit, which puts the submodule in "detached HEAD" state.
+
+=== Is This a Problem?
+
+No, this is correct behavior for submodules. It ensures:
+
+* **Reproducibility**: Parent repo always gets exact same content
+* **Stability**: Changes to arc42-template don't break build unexpectedly
+* **Version control**: Parent repo controls which template version to build
+
+=== When to Checkout a Branch?
+
+Only checkout a branch in the submodule when you're:
+
+1. Contributing changes (need a branch to push)
+2. Testing latest changes from a specific branch
+3. Developing new features
+
+For normal building, detached HEAD is correct.
+
+== Troubleshooting
+
+=== "Submodule not initialized"
+
+Run:
+[source,bash]
+----
+make update-submodule
+----
+
+=== "Git command not found"
+
+Install Git:
+[source,bash]
+----
+# Ubuntu/Debian
+sudo apt-get install git
+
+# macOS
+brew install git
+
+# Windows
+# Download from https://git-scm.com/
+----
+
+=== "Permission denied when pushing"
+
+You're trying to push to `origin` (arc42/arc42-template) but don't have permissions.
+
+Solution: Fork the repo and push to your fork:
+[source,bash]
+----
+make submodule-push-help  # Follow the guide
+----
+
+=== "Modified files in submodule but I didn't change anything"
+
+This can happen if:
+
+1. You ran a build that modified template files (shouldn't happen)
+2. File permissions changed
+3. Line endings changed (Windows)
+
+Check what changed:
+[source,bash]
+----
+cd arc42-template
+git status
+git diff
+----
+
+Discard changes:
+[source,bash]
+----
+cd arc42-template
+git checkout .
+git clean -fd
+----
+
+== Best Practices
+
+[TIP]
+====
+**For Build System Contributors:**
+
+* Keep submodule at detached HEAD (pinned commit)
+* Update submodule reference consciously (test before committing)
+* Document why you updated submodule in commit message
+
+**For Content Contributors:**
+
+* Always fork arc42-template first
+* Never push directly to arc42/arc42-template
+* Test builds before submitting PRs
+* Keep content changes separate from build system changes
+====
+
+== Advanced: Submodule Internals
+
+=== How Parent Repo Tracks Submodule
+
+The parent repository stores:
+
+1. **Submodule URL**: In `.gitmodules` file
++
+[source,ini]
+----
+[submodule "arc42-template"]
+    path = arc42-template
+    url = https://github.com/arc42/arc42-template.git
+----
+
+2. **Submodule commit**: In Git tree object
++
+[source,bash]
+----
+$ git ls-tree HEAD arc42-template
+160000 commit f507ad6... arc42-template
+----
+
+=== Changing Submodule URL
+
+If the arc42-template repo moves:
+
+[source,bash]
+----
+git config submodule.arc42-template.url https://new-url.git
+git submodule sync
+make update-submodule
+----
+
+== See Also
+
+* link:docs/architecture-documentation.md#5-two-repository-model[ADR-005: Two-Repository Model]
+* link:README.md#-project-structure[Project Structure]
+* https://git-scm.com/book/en/v2/Git-Tools-Submodules[Git Submodules Documentation]
+* https://arc42.org/contribute[arc42 Contributing Guide]
+
+---
+
+*Last Updated*: 2025-11-18 +
+*Maintainer*: arc42 core team

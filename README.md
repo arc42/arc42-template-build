@@ -60,11 +60,17 @@ That's it! Outputs will be in `workspace/build/`
 
 ### Submodule Management
 
+The `arc42-template/` directory is a Git submodule. These commands help manage it:
+
 | Command | Description |
 |---------|-------------|
+| `make submodule-status` | Show detailed status of arc42-template submodule |
 | `make update-submodule` | Update to commit referenced in parent repo (safe, recommended) |
 | `make update-submodule-latest` | Update to latest commit from master branch |
 | `make update-submodule-latest SUBMODULE_BRANCH=<branch>` | Update to latest from specific branch |
+| `make submodule-push-help` | Show comprehensive guide for contributing changes to arc42-template |
+
+📖 **Detailed Guide**: See [`readme.adoc`](readme.adoc) for complete submodule management documentation
 
 ### Advanced Usage
 

@@ -26,7 +26,7 @@ endif
 DC_RUN = $(DOCKER_COMPOSE) run --rm builder
 
 # Phony targets
-.PHONY: all build build-image check validate test test-build-artifacts dist clean shell help update-submodule update-submodule-latest
+.PHONY: all build build-image check validate test test-build-artifacts dist clean shell help update-submodule update-submodule-latest submodule-status submodule-push-help
 
 # --- Default Target ---
 all: build
@@ -48,8 +48,12 @@ help:
 	@echo "  dist                   - Create ZIP distributions of build artifacts"
 	@echo "  clean                  - Remove all generated artifacts"
 	@echo "  shell                  - Open a shell inside the Docker container (for debugging)"
+	@echo ""
+	@echo "Submodule management:"
+	@echo "  submodule-status       - Show detailed status of arc42-template submodule"
 	@echo "  update-submodule       - Initialize/update to commit referenced in parent repo"
 	@echo "  update-submodule-latest - Update to latest from branch (default: master)"
+	@echo "  submodule-push-help    - Show help for contributing changes back to arc42-template"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make build                         - Full build (all languages, formats, flavors)"
@@ -179,6 +183,120 @@ update-submodule-latest:
 		echo "        git add $(TEMPLATE_DIR)"; \
 		echo "        git commit -m 'Update arc42-template submodule to latest from $(SUBMODULE_BRANCH)'"; \
 	fi
+
+# Show detailed status of the submodule
+submodule-status:
+	@echo "==> arc42-template Submodule Status"
+	@echo ""
+	@if ! command -v git > /dev/null 2>&1; then \
+		echo "[ERROR] Git not found. Please install git."; \
+		exit 1; \
+	fi
+	@if [ ! -d "$(TEMPLATE_DIR)/.git" ]; then \
+		echo "[STATUS] Submodule NOT initialized"; \
+		echo ""; \
+		echo "To initialize, run:"; \
+		echo "    make update-submodule"; \
+		exit 0; \
+	fi
+	@echo "[STATUS] Submodule initialized"; \
+	echo ""; \
+	echo "Current submodule commit:"; \
+	cd $(TEMPLATE_DIR) && git log -1 --format="  %h - %s (%ar)" || echo "  [ERROR] Unable to read commit"; \
+	echo ""; \
+	echo "Referenced commit in parent repo:"; \
+	git ls-tree HEAD $(TEMPLATE_DIR) | awk '{print "  " $$3 " (pinned in parent)"}'; \
+	echo ""; \
+	echo "Branch:"; \
+	cd $(TEMPLATE_DIR) && git branch --show-current 2>/dev/null | awk '{print "  " $$0}' || echo "  [detached HEAD state - normal for submodules]"; \
+	echo ""; \
+	echo "Remote:"; \
+	cd $(TEMPLATE_DIR) && git remote get-url origin 2>/dev/null | awk '{print "  " $$0}' || echo "  [no remote configured]"; \
+	echo ""; \
+	echo "Working directory status:"; \
+	cd $(TEMPLATE_DIR) && if [ -z "$$(git status --porcelain)" ]; then \
+		echo "  Clean (no uncommitted changes)"; \
+	else \
+		echo "  Modified files detected:"; \
+		git status --short | sed 's/^/    /'; \
+	fi; \
+	echo ""; \
+	echo "Commits ahead/behind origin:"; \
+	cd $(TEMPLATE_DIR) && git fetch origin 2>/dev/null || true; \
+	cd $(TEMPLATE_DIR) && CURRENT_BRANCH=$$(git rev-parse --abbrev-ref HEAD 2>/dev/null); \
+	if [ "$$CURRENT_BRANCH" = "HEAD" ]; then \
+		echo "  N/A (detached HEAD state)"; \
+	else \
+		AHEAD=$$(cd $(TEMPLATE_DIR) && git rev-list --count origin/$$CURRENT_BRANCH..HEAD 2>/dev/null || echo "0"); \
+		BEHIND=$$(cd $(TEMPLATE_DIR) && git rev-list --count HEAD..origin/$$CURRENT_BRANCH 2>/dev/null || echo "0"); \
+		echo "  Ahead: $$AHEAD commit(s)"; \
+		echo "  Behind: $$BEHIND commit(s)"; \
+	fi
+
+# Show help for pushing submodule changes back to origin
+submodule-push-help:
+	@echo "==> How to Contribute Changes to arc42-template"
+	@echo ""
+	@echo "The arc42-template directory is a Git submodule pointing to:"
+	@echo "    https://github.com/arc42/arc42-template.git"
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "WORKFLOW: Contributing Content Changes to arc42-template"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "Step 1: Fork the arc42-template repository"
+	@echo "    → Visit: https://github.com/arc42/arc42-template"
+	@echo "    → Click 'Fork' to create your own copy"
+	@echo ""
+	@echo "Step 2: Add your fork as a remote in the submodule"
+	@echo "    cd $(TEMPLATE_DIR)"
+	@echo "    git remote add myfork https://github.com/YOUR_USERNAME/arc42-template.git"
+	@echo "    git remote -v  # Verify remotes"
+	@echo ""
+	@echo "Step 3: Create a feature branch"
+	@echo "    cd $(TEMPLATE_DIR)"
+	@echo "    git checkout -b feature/your-improvement-name"
+	@echo ""
+	@echo "Step 4: Make your changes"
+	@echo "    → Edit files in $(TEMPLATE_DIR)/EN/, $(TEMPLATE_DIR)/DE/, etc."
+	@echo "    → Test your changes by building:"
+	@echo "      cd /path/to/arc42-template-build"
+	@echo "      make build"
+	@echo ""
+	@echo "Step 5: Commit your changes in the submodule"
+	@echo "    cd $(TEMPLATE_DIR)"
+	@echo "    git add ."
+	@echo "    git commit -m 'Improve: your description here'"
+	@echo ""
+	@echo "Step 6: Push to YOUR fork"
+	@echo "    cd $(TEMPLATE_DIR)"
+	@echo "    git push myfork feature/your-improvement-name"
+	@echo ""
+	@echo "Step 7: Create Pull Request"
+	@echo "    → Visit: https://github.com/YOUR_USERNAME/arc42-template"
+	@echo "    → Click 'Pull Request' to propose changes to arc42/arc42-template"
+	@echo "    → Describe your changes clearly"
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "IMPORTANT NOTES"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "⚠️  DO NOT push directly to arc42/arc42-template (requires permissions)"
+	@echo "✓  DO push to your fork and create a Pull Request"
+	@echo "✓  DO keep build system changes (this repo) separate from content changes"
+	@echo "✓  DO test builds before submitting PR"
+	@echo ""
+	@echo "After your PR is merged in arc42-template:"
+	@echo "    1. Update this build repo's submodule reference:"
+	@echo "       make update-submodule-latest"
+	@echo "    2. Commit the submodule update in THIS repo:"
+	@echo "       git add $(TEMPLATE_DIR)"
+	@echo "       git commit -m 'Update arc42-template submodule to include [your change]'"
+	@echo ""
+	@echo "For more help:"
+	@echo "    → arc42 Contributing Guide: https://arc42.org/contribute"
+	@echo "    → Submodule status: make submodule-status"
+	@echo ""
 
 # --- Clean ---
 clean:
