@@ -15,13 +15,29 @@ DEFAULT_CONFIG_PATH = Path("/app/config/build.yaml")
 @click.pass_context
 def cli(ctx, config_path, verbose):
     """arc42 template build system"""
-    log_level = "DEBUG" if verbose else "INFO"
-    logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
-    
+    # Initial logging setup with minimal level for config loading
+    logging.basicConfig(level="ERROR", format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+
     ctx.ensure_object(dict)
     try:
         config = ConfigLoader().load(config_path)
         ctx.obj['config'] = config
+
+        # Now configure logging based on config file and CLI options
+        # CLI --verbose flag overrides config file setting
+        if verbose:
+            log_level = "DEBUG"
+        else:
+            log_level = config.logging.level if hasattr(config, 'logging') else "INFO"
+
+        # Reconfigure logging with the proper level
+        logging.getLogger().setLevel(getattr(logging, log_level))
+
+        # Also apply console output setting from config
+        if hasattr(config, 'logging') and not config.logging.console:
+            # Disable console output if configured
+            logging.getLogger().handlers[0].setLevel(logging.CRITICAL)
+
     except FileNotFoundError:
         logging.error(f"Configuration file not found at {config_path}. Please specify a valid path with --config.")
         ctx.exit(1)
