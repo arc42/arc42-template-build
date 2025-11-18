@@ -42,17 +42,29 @@ class PdfConverter(ConverterPlugin):
         if context.flavor == "withHelp":
             attributes['show-help'] = ''
 
-        # Logic for theme detection from the proposal
-        theme_yml_path = context.source_dir / "pdf-theme" / f"{context.language.lower()}-theme.yml"
-        fonts_dir = context.source_dir / "pdf-theme" / "fonts"
-        
-        if theme_yml_path.exists():
-            logger.info(f"Loading PDF theme from {theme_yml_path}")
-            attributes['pdf-theme'] = str(theme_yml_path.absolute())
-            if fonts_dir.exists():
-                attributes['pdf-fontsdir'] = str(fonts_dir.absolute())
+        # Theme detection with smart fallback strategy
+        # 1. Check for template-specific theme
+        template_theme_path = context.source_dir / "pdf-theme" / f"{context.language.lower()}-theme.yml"
+        template_fonts_dir = context.source_dir / "pdf-theme" / "fonts"
+
+        # 2. Default themes location (in Docker image)
+        default_themes_dir = Path("/opt/arc42/pdf-themes")
+
+        if template_theme_path.exists():
+            # Use template-specific theme (highest priority)
+            logger.info(f"Using template-specific PDF theme: {template_theme_path}")
+            attributes['pdf-theme'] = str(template_theme_path.absolute())
+            if template_fonts_dir.exists():
+                attributes['pdf-fontsdir'] = str(template_fonts_dir.absolute())
         else:
-            logger.warning(f"No language-specific PDF theme found at {theme_yml_path}. Using default.")
+            # Use default theme with script-based fallback
+            theme_file = self._select_theme_for_language(context.language, default_themes_dir)
+            if theme_file and theme_file.exists():
+                logger.info(f"Using default PDF theme: {theme_file.name} for language {context.language}")
+                attributes['pdf-theme'] = str(theme_file.absolute())
+                # Fonts are already in system paths, no need to specify pdf-fontsdir
+            else:
+                logger.warning(f"No PDF theme found for {context.language}. Using Asciidoctor PDF defaults.")
 
         # Add language-specific scripts
         if context.language in ['ZH', 'JA', 'KO']:
@@ -82,3 +94,48 @@ class PdfConverter(ConverterPlugin):
             if e.stderr:
                 logger.error(f"STDERR: {e.stderr}")
             raise
+
+    def _select_theme_for_language(self, language: str, themes_dir: Path) -> Path:
+        """
+        Select appropriate PDF theme based on language and script type.
+
+        Uses script-based fallback strategy:
+        - Latin scripts (EN, DE, FR, ES, IT, PT, CZ, NL) → en-theme.yml
+        - Cyrillic scripts (UKR, RU) → ukr-theme.yml
+        - CJK scripts (ZH, JA, KO) → zh-theme.yml
+        - Unknown → default-theme.yml
+
+        Args:
+            language: Language code (e.g., "EN", "UKR", "ZH")
+            themes_dir: Directory containing theme files
+
+        Returns:
+            Path to the selected theme file
+        """
+        lang = language.upper()
+
+        # Language to script mapping
+        LATIN_SCRIPTS = {'EN', 'DE', 'FR', 'ES', 'IT', 'PT', 'CZ', 'NL'}
+        CYRILLIC_SCRIPTS = {'UKR', 'RU'}
+        CJK_SCRIPTS = {'ZH', 'JA', 'KO'}
+
+        # Determine theme based on script type
+        if lang in LATIN_SCRIPTS:
+            theme_name = "en-theme.yml"
+        elif lang in CYRILLIC_SCRIPTS:
+            theme_name = "ukr-theme.yml"
+        elif lang in CJK_SCRIPTS:
+            theme_name = "zh-theme.yml"
+        else:
+            # Fallback for unknown languages
+            theme_name = "default-theme.yml"
+            logger.info(f"Language '{lang}' not mapped to specific theme, using default")
+
+        theme_path = themes_dir / theme_name
+
+        # If the selected theme doesn't exist, fall back to default
+        if not theme_path.exists():
+            logger.warning(f"Theme {theme_name} not found, falling back to default")
+            theme_path = themes_dir / "default-theme.yml"
+
+        return theme_path

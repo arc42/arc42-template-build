@@ -1,0 +1,132 @@
+# arc42 PDF Theme - Chinese / CJK Scripts
+# Optimized for: ZH (Chinese), JA (Japanese), KO (Korean)
+# Font requirements: Noto Sans CJK SC (included in Docker image)
+
+extends: default
+
+font:
+  catalog:
+    # Primary font family - Noto Sans CJK SC (Simplified Chinese)
+    # Note: This font is large (~15MB) but provides excellent CJK coverage
+    NotoSansCJK:
+      normal: NotoSansCJKsc-Regular.ttf
+      bold: NotoSansCJKsc-Bold.ttf
+      italic: NotoSansCJKsc-Regular.ttf
+      bold_italic: NotoSansCJKsc-Bold.ttf
+
+    # Fallback for Latin characters - Noto Sans
+    Noto:
+      normal: NotoSans-Regular.ttf
+      bold: NotoSans-Bold.ttf
+      italic: NotoSans-Italic.ttf
+      bold_italic: NotoSans-BoldItalic.ttf
+
+    # Monospace font for code blocks
+    NotoMono:
+      normal: NotoSansMono-Regular.ttf
+      bold: NotoSansMono-Bold.ttf
+      italic: NotoSansMono-Regular.ttf
+      bold_italic: NotoSansMono-Bold.ttf
+
+  fallbacks:
+    - Noto
+
+page:
+  background_color: FFFFFF
+  layout: portrait
+  margin: [0.75in, 1in, 0.75in, 1in]
+  size: A4
+
+base:
+  font_family: NotoSansCJK
+  # Slightly larger font size for CJK characters (better readability)
+  font_size: 11
+  line_height_length: 16
+  line_height: $base_line_height_length / $base_font_size
+  font_color: 333333
+  # CJK text typically uses left alignment rather than justify
+  align: left
+
+vertical_rhythm: $base_line_height_length
+
+heading:
+  font_family: NotoSansCJK
+  font_color: 1a1a1a
+  font_style: bold
+  line_height: 1.3
+  margin_top: $vertical_rhythm * 0.5
+  margin_bottom: $vertical_rhythm * 0.3
+  h1:
+    font_size: floor($base_font_size * 2.0)
+    font_color: 0066cc
+  h2:
+    font_size: floor($base_font_size * 1.7)
+    font_color: 0066cc
+  h3:
+    font_size: floor($base_font_size * 1.4)
+  h4:
+    font_size: floor($base_font_size * 1.2)
+  h5:
+    font_size: floor($base_font_size * 1.1)
+  h6:
+    font_size: $base_font_size
+
+link:
+  font_color: 0066cc
+
+outline_list:
+  # Wider indent for CJK characters
+  indent: $base_font_size * 2
+  item_spacing: $vertical_rhythm / 2
+
+code:
+  font_family: NotoMono
+  font_size: floor($base_font_size * 0.85)
+  font_color: 333333
+  background_color: f5f5f5
+  border_color: cccccc
+  border_width: 0.5
+  border_radius: 3
+  padding: [3, 6, 3, 6]
+
+codespan:
+  font_family: NotoMono
+  font_size: floor($base_font_size * 0.85)
+  font_color: c7254e
+  background_color: f9f2f4
+
+table:
+  background_color: FFFFFF
+  border_color: dddddd
+  border_width: 0.5
+  # More padding for CJK characters
+  cell_padding: 4
+  head:
+    font_style: bold
+    font_color: FFFFFF
+    background_color: 0066cc
+
+admonition:
+  border_width: 0.5
+  padding: [12, 12, 12, 12]
+  label:
+    font_style: bold
+
+sidebar:
+  background_color: f5f5f5
+  border_color: 0066cc
+  border_width: 3
+  border_radius: 4
+  padding: [12, 12, 12, 12]
+  title:
+    font_style: bold
+    font_color: 0066cc
+
+# arc42-specific styling for help sections
+role:
+  arc42help:
+    background_color: fffef0
+    border_color: ffcc00
+    border_width: 1
+    border_radius: 3
+    padding: [8, 12, 8, 12]
