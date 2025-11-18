@@ -89,6 +89,8 @@ FROM python-env AS app
 # Copy application code
 COPY src/ /app/src/
 COPY config/ /app/config/
+COPY tests/ /app/tests/
+COPY pytest.ini /app/pytest.ini
 
 # Set Python path to find the module
 ENV PYTHONPATH=/app
