@@ -192,50 +192,50 @@ submodule-status:
 		echo "[ERROR] Git not found. Please install git."; \
 		exit 1; \
 	fi
-	@if [ ! -d "$(TEMPLATE_DIR)/.git" ]; then \
+	@if [ ! -e "$(TEMPLATE_DIR)/.git" ]; then \
 		echo "[STATUS] Submodule NOT initialized"; \
 		echo ""; \
 		echo "To initialize, run:"; \
 		echo "    make update-submodule"; \
-		exit 0; \
-	fi
-	@echo "[STATUS] Submodule initialized"
-	@echo ""
-	@echo "Current submodule commit:"
-	@git -C $(TEMPLATE_DIR) log -1 --format="  %h - %s (%ar)" 2>/dev/null || echo "  [ERROR] Unable to read commit"
-	@echo ""
-	@echo "Referenced commit in parent repo:"
-	@git ls-tree HEAD $(TEMPLATE_DIR) | awk '{print "  " $$3 " (pinned in parent)"}'
-	@echo ""
-	@echo "Branch:"
-	@BRANCH=$$(git -C $(TEMPLATE_DIR) branch --show-current 2>/dev/null); \
-	if [ -z "$$BRANCH" ]; then \
-		echo "  [detached HEAD state - normal for submodules]"; \
 	else \
-		echo "  $$BRANCH"; \
-	fi
-	@echo ""
-	@echo "Remote:"
-	@git -C $(TEMPLATE_DIR) remote get-url origin 2>/dev/null | awk '{print "  " $$0}' || echo "  [no remote configured]"
-	@echo ""
-	@echo "Working directory status:"
-	@if [ -z "$$(git -C $(TEMPLATE_DIR) status --porcelain 2>/dev/null)" ]; then \
-		echo "  Clean (no uncommitted changes)"; \
-	else \
-		echo "  Modified files detected:"; \
-		git -C $(TEMPLATE_DIR) status --short 2>/dev/null | sed 's/^/    /'; \
-	fi
-	@echo ""
-	@echo "Commits ahead/behind origin:"
-	@git -C $(TEMPLATE_DIR) fetch origin 2>/dev/null || true
-	@CURRENT_BRANCH=$$(git -C $(TEMPLATE_DIR) rev-parse --abbrev-ref HEAD 2>/dev/null); \
-	if [ "$$CURRENT_BRANCH" = "HEAD" ]; then \
-		echo "  N/A (detached HEAD state)"; \
-	else \
-		AHEAD=$$(git -C $(TEMPLATE_DIR) rev-list --count origin/$$CURRENT_BRANCH..HEAD 2>/dev/null || echo "0"); \
-		BEHIND=$$(git -C $(TEMPLATE_DIR) rev-list --count HEAD..origin/$$CURRENT_BRANCH 2>/dev/null || echo "0"); \
-		echo "  Ahead: $$AHEAD commit(s)"; \
-		echo "  Behind: $$BEHIND commit(s)"; \
+		echo "[STATUS] Submodule initialized"; \
+		echo ""; \
+		echo "Current submodule commit:"; \
+		git -C $(TEMPLATE_DIR) log -1 --format="  %h - %s (%ar)" 2>/dev/null || echo "  [ERROR] Unable to read commit"; \
+		echo ""; \
+		echo "Referenced commit in parent repo:"; \
+		git ls-tree HEAD $(TEMPLATE_DIR) | awk '{print "  " $$3 " (pinned in parent)"}'; \
+		echo ""; \
+		echo "Branch:"; \
+		BRANCH=$$(git -C $(TEMPLATE_DIR) branch --show-current 2>/dev/null); \
+		if [ -z "$$BRANCH" ]; then \
+			echo "  [detached HEAD state - normal for submodules]"; \
+		else \
+			echo "  $$BRANCH"; \
+		fi; \
+		echo ""; \
+		echo "Remote:"; \
+		git -C $(TEMPLATE_DIR) remote get-url origin 2>/dev/null | awk '{print "  " $$0}' || echo "  [no remote configured]"; \
+		echo ""; \
+		echo "Working directory status:"; \
+		if [ -z "$$(git -C $(TEMPLATE_DIR) status --porcelain 2>/dev/null)" ]; then \
+			echo "  Clean (no uncommitted changes)"; \
+		else \
+			echo "  Modified files detected:"; \
+			git -C $(TEMPLATE_DIR) status --short 2>/dev/null | sed 's/^/    /'; \
+		fi; \
+		echo ""; \
+		echo "Commits ahead/behind origin:"; \
+		git -C $(TEMPLATE_DIR) fetch origin 2>/dev/null || true; \
+		CURRENT_BRANCH=$$(git -C $(TEMPLATE_DIR) rev-parse --abbrev-ref HEAD 2>/dev/null); \
+		if [ "$$CURRENT_BRANCH" = "HEAD" ]; then \
+			echo "  N/A (detached HEAD state)"; \
+		else \
+			AHEAD=$$(git -C $(TEMPLATE_DIR) rev-list --count origin/$$CURRENT_BRANCH..HEAD 2>/dev/null || echo "0"); \
+			BEHIND=$$(git -C $(TEMPLATE_DIR) rev-list --count HEAD..origin/$$CURRENT_BRANCH 2>/dev/null || echo "0"); \
+			echo "  Ahead: $$AHEAD commit(s)"; \
+			echo "  Behind: $$BEHIND commit(s)"; \
+		fi; \
 	fi
 
 # Show help for pushing submodule changes back to origin
