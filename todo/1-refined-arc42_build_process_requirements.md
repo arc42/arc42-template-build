@@ -1,5 +1,5 @@
 
-# arc42 Build Process – Requirements (Updated)
+# arc42 Build Process – Requirements
 
 ## Overview and Goals
 
@@ -13,20 +13,21 @@ The goals are:
 - Run **locally (via Docker)** and in **cloud-based environments** (e.g., GitHub Codespaces, CI).
 - Be easily **extensible** (new formats, new templates such as req42).
 
-This specification is intended to be usable as **input for code generation tools (LLMs)** that help implement the build system.
 
 ---
 
 ## Context: arc42 Template
 
-arc42 is a lightweight software architecture documentation template, available in multiple natural languages (EN, DE, FR, CZ, ES, IT, NL, PT, RU, UKR, ZH).
+arc42 is a lightweight software architecture documentation template, available in multiple natural languages (currently EN, DE, FR, CZ, ES, IT, NL, PT, RU, UKR, ZH).
 
 - The **English and German** versions are maintained by core committers.
+-  EN is considered the "source of truth", where all other translations should be based upon.
 - Other languages are maintained by community contributors and reviewed by the community.
 
 The template is maintained as **AsciiDoc** source files in a GitHub repository:
 
 - Repository: `https://github.com/arc42/arc42-template`
+- Updated versions are released once every few month (or years), or when new languages or formats appear. The versions might differ for the natural languages, and are marked in a language-specific `version.properties` configuration.
 
 Example structure for a language:
 
@@ -70,6 +71,9 @@ revremark=(based upon the asciidoc version)
 
 The build process must read and apply this metadata into generated artifacts.
 
+>Currently, the `revremark` metadata does not work, it's handling definitely needs to be improved.
+
+
 ### Diagrams
 
 Some diagrams (PNG/JPG, often originating from draw.io) are included to explain concepts and views.
@@ -92,10 +96,11 @@ The build process must be robust against these layout changes and support both s
 
 ### Repository Strategy (Decision)
 
-For arc42 (and related templates such as req42), we deliberately choose a **two-repository setup** as the primary and supported model:
+For arc42 (and related templates such as req42), we deliberately choose a **two-repository setup**:
 
-1. **Build repository** (e.g. `arc42-build` or `arc42-generator`)
+1. **Build repository** (`arc42-template-build`)
    - Contains all build logic, configuration, Docker setup, and CI workflows.
+   - Contains a Makefile (or similar) to orchestrate useful and required build steps, like fetching and updating the template repositories (see below).
    - Knows how to fetch or reference one or more template repositories (arc42, req42, etc.).
 
 2. **Template repository** (e.g. `arc42-template`, later also `req42-template`)
@@ -106,11 +111,13 @@ The build repository treats templates as **dependencies**. It may reference them
 
 From the build system’s point of view, the canonical interface is:
 
-> Given a local path (or Git URL + ref) to a template repository and a configuration file, produce the configured outputs into `dist/`.
+> Given a local path (or Git URL + ref) to a template repository and a configuration file, produce the configured outputs into `workspace/dist/`.
 
-Contributors working on content (translations, corrections) primarily interact with the template repository. Core maintainers and release engineers work with the build repository to generate and publish artifacts.
+Contributors working on content (translations, corrections) primarily interact with the template repository. 
+The template repositories contain a rudimentary convenience build that might create pdf only.
 
-Single-repository setups are not a primary design target for this build system. They can still use the build tooling by treating the template folder as an external input path, but the reference architecture and CI examples assume the two-repository model described above.
+Core maintainers and release engineers work with the build repository to generate and publish artifacts.
+
 
 ---
 
