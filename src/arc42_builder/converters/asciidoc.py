@@ -41,10 +41,20 @@ class AsciidocConverter(ConverterPlugin):
             cmd.append("-a show-help")
 
         logger.debug(f"Executing command to bundle AsciiDoc: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        
-        # Write the captured stdout to the output file
-        output_file.write_text(result.stdout, encoding='utf-8')
-        
-        logger.info(f"Successfully created bundled AsciiDoc file: {output_file}")
-        return output_file
+
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+
+            # Write the captured stdout to the output file
+            output_file.write_text(result.stdout, encoding='utf-8')
+
+            logger.info(f"Successfully created bundled AsciiDoc file: {output_file}")
+            return output_file
+        except subprocess.CalledProcessError as e:
+            logger.error(f"AsciiDoc bundling failed for {context.language}-{context.flavor}")
+            logger.error(f"Command: {' '.join(cmd)}")
+            if e.stdout:
+                logger.error(f"STDOUT: {e.stdout}")
+            if e.stderr:
+                logger.error(f"STDERR: {e.stderr}")
+            raise

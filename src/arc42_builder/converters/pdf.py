@@ -69,10 +69,16 @@ class PdfConverter(ConverterPlugin):
         cmd.append(str(context.source_dir / "arc42-template.adoc"))
         
         logger.debug(f"Executing command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        
-        if result.returncode != 0:
-            raise RuntimeError(f"PDF generation failed: {result.stderr}")
-        
-        logger.info(f"Successfully created PDF file: {output_file}")
-        return output_file
+
+        try:
+            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logger.info(f"Successfully created PDF file: {output_file}")
+            return output_file
+        except subprocess.CalledProcessError as e:
+            logger.error(f"PDF conversion failed for {context.language}-{context.flavor}")
+            logger.error(f"Command: {' '.join(cmd)}")
+            if e.stdout:
+                logger.error(f"STDOUT: {e.stdout}")
+            if e.stderr:
+                logger.error(f"STDERR: {e.stderr}")
+            raise

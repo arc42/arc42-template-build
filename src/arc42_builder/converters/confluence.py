@@ -55,10 +55,19 @@ class ConfluenceConverter(ConverterPlugin):
             cmd.append("-a show-help")
 
         logger.debug(f"Executing command: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
 
-        logger.info(f"Successfully created Confluence XHTML file: {output_file}")
-        return output_file
+        try:
+            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logger.info(f"Successfully created Confluence XHTML file: {output_file}")
+            return output_file
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Confluence conversion failed for {context.language}-{context.flavor}")
+            logger.error(f"Command: {' '.join(cmd)}")
+            if e.stdout:
+                logger.error(f"STDOUT: {e.stdout}")
+            if e.stderr:
+                logger.error(f"STDERR: {e.stderr}")
+            raise
 
     def get_output_extension(self) -> str:
         return ".xhtml"
