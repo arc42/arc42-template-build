@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 import logging
+import shutil
 from .base import ConverterPlugin, BuildContext
 
 logger = logging.getLogger(__name__)
@@ -25,17 +26,25 @@ class TextileConverter(ConverterPlugin):
         output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.textile").absolute()
         main_adoc_file = context.source_dir / "arc42-template.adoc"
 
+        # Copy images directory to output directory for relative referencing
+        source_images_dir = context.source_dir / "images"
+        output_images_dir = context.output_dir / "images"
+
+        if source_images_dir.exists():
+            if output_images_dir.exists():
+                shutil.rmtree(output_images_dir)
+            shutil.copytree(source_images_dir, output_images_dir)
+            logger.debug(f"Copied images from {source_images_dir} to {output_images_dir}")
+
         # Create a temporary HTML file via Asciidoctor
         temp_html_file = (context.output_dir / f"temp-{context.language}-{context.flavor}.html").absolute()
-
-        # Set absolute path to images directory
-        images_dir = context.source_dir / "images"
 
         asciidoctor_cmd = [
             "asciidoctor",
             "-b", "html5",
             "-a", f"flavor={context.flavor}",
-            "-a", f"imagesdir={images_dir.absolute()}",
+            # Use relative path to images directory
+            "-a", "imagesdir=images",
             str(main_adoc_file),
             "-o", str(temp_html_file)
         ]
@@ -47,11 +56,13 @@ class TextileConverter(ConverterPlugin):
         subprocess.run(asciidoctor_cmd, check=True)
 
         # Convert the intermediate HTML to Textile using Pandoc
+        # Use --resource-path to tell Pandoc where to find images
         pandoc_cmd = [
             "pandoc",
             str(temp_html_file),
             "-f", "html",
             "-t", "textile",
+            "--resource-path", str(context.output_dir),
             "-o", str(output_file)
         ]
 

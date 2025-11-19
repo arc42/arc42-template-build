@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 import logging
+import shutil
 
 from .base import ConverterPlugin, BuildContext
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 class HtmlConverter(ConverterPlugin):
     def __init__(self):
         super().__init__("html", priority=1)
-    
+
     def check_dependencies(self) -> bool:
         try:
             result = subprocess.run(
@@ -23,12 +24,19 @@ class HtmlConverter(ConverterPlugin):
         except (subprocess.CalledProcessError, FileNotFoundError):
             logger.error("Asciidoctor not found. Please ensure it is installed and in the system's PATH.")
             return False
-    
+
     def convert(self, context: BuildContext) -> Path:
         output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.html").absolute()
 
-        # Set absolute path to images directory
-        images_dir = context.source_dir / "images"
+        # Copy images directory to output directory for relative referencing
+        source_images_dir = context.source_dir / "images"
+        output_images_dir = context.output_dir / "images"
+
+        if source_images_dir.exists():
+            if output_images_dir.exists():
+                shutil.rmtree(output_images_dir)
+            shutil.copytree(source_images_dir, output_images_dir)
+            logger.debug(f"Copied images from {source_images_dir} to {output_images_dir}")
 
         # Build asciidoctor command
         cmd = [
@@ -39,8 +47,8 @@ class HtmlConverter(ConverterPlugin):
             "-a", f"revremark={context.version_props.get('revremark', '')}",
             # Pass flavor as an attribute for AsciiDoc's conditional processing
             "-a", f"flavor={context.flavor}",
-            # Set absolute path to images so they can be found regardless of output location
-            "-a", f"imagesdir={images_dir.absolute()}",
+            # Use relative path to images directory (relative to HTML file)
+            "-a", "imagesdir=images",
             "-D", str(context.output_dir),
             "-o", str(output_file),
             str(context.source_dir / "arc42-template.adoc")
@@ -50,7 +58,7 @@ class HtmlConverter(ConverterPlugin):
         # The AsciiDoc source should use ifdef::show-help[] or ifeval::["{flavor}" == "withHelp"]
         if context.flavor == "withHelp":
             cmd.append("-a show-help")
-        
+
         logger.debug(f"Executing command: {' '.join(cmd)}")
 
         try:

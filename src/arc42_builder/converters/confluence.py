@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 import logging
+import shutil
 from .base import ConverterPlugin, BuildContext
 
 logger = logging.getLogger(__name__)
@@ -35,8 +36,15 @@ class ConfluenceConverter(ConverterPlugin):
         output_file = (context.output_dir / f"arc42-template-{context.language}-{context.flavor}.xhtml").absolute()
         main_adoc_file = context.source_dir / "arc42-template.adoc"
 
-        # Set absolute path to images directory
-        images_dir = context.source_dir / "images"
+        # Copy images directory to output directory for relative referencing
+        source_images_dir = context.source_dir / "images"
+        output_images_dir = context.output_dir / "images"
+
+        if source_images_dir.exists():
+            if output_images_dir.exists():
+                shutil.rmtree(output_images_dir)
+            shutil.copytree(source_images_dir, output_images_dir)
+            logger.debug(f"Copied images from {source_images_dir} to {output_images_dir}")
 
         # Build asciidoctor command with Confluence backend
         cmd = [
@@ -46,7 +54,8 @@ class ConfluenceConverter(ConverterPlugin):
             "-a", f"revnumber={context.version_props.get('revnumber', '')}",
             "-a", f"revdate={context.version_props.get('revdate', '')}",
             "-a", f"flavor={context.flavor}",
-            "-a", f"imagesdir={images_dir.absolute()}",
+            # Use relative path to images directory
+            "-a", "imagesdir=images",
             "-o", str(output_file),
             str(main_adoc_file)
         ]

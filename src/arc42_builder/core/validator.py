@@ -24,6 +24,8 @@ class Validator:
         """Validate generated build artifacts for syntax and completeness."""
         logger.info("Validating build artifacts...")
         self.validate_markdown_artifacts(build_dir)
+        self.validate_html_artifacts(build_dir)
+        self.validate_docx_artifacts(build_dir)
         logger.info("Build artifact validation passed.")
 
     def validate_template_path(self):
@@ -200,3 +202,114 @@ class Validator:
             )
 
         logger.info(f"All {len(md_files)} Markdown files validated successfully")
+
+    def validate_html_artifacts(self, build_dir: Path):
+        """
+        Validate HTML files for broken image references.
+        """
+        import re
+        from html.parser import HTMLParser
+
+        logger.info("Validating HTML artifacts...")
+
+        html_files = list(build_dir.glob("**/*.html"))
+
+        if not html_files:
+            logger.warning("No HTML files found to validate")
+            return
+
+        class ImageExtractor(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.images = []
+
+            def handle_starttag(self, tag, attrs):
+                if tag == 'img':
+                    for attr, value in attrs:
+                        if attr == 'src':
+                            self.images.append(value)
+
+        errors = []
+        for html_file in html_files:
+            try:
+                with open(html_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                parser = ImageExtractor()
+                parser.feed(content)
+
+                # Check if referenced images exist
+                for img_src in parser.images:
+                    # Skip absolute URLs (http://, https://, data:, etc.)
+                    if img_src.startswith(('http://', 'https://', 'data:', '//')):
+                        continue
+
+                    # Skip absolute paths (these shouldn't exist after our fix)
+                    if img_src.startswith('/'):
+                        errors.append(f"{html_file.name}: Image uses absolute path: {img_src}")
+                        continue
+
+                    # Check relative path
+                    img_path = html_file.parent / img_src
+                    if not img_path.exists():
+                        errors.append(f"{html_file.name}: Missing image: {img_src}")
+
+                logger.debug(f"HTML validation passed for {html_file.name} ({len(parser.images)} images found)")
+
+            except Exception as e:
+                errors.append(f"{html_file.name}: Validation error: {e}")
+                logger.error(f"HTML validation failed for {html_file}: {e}")
+
+        if errors:
+            raise ValueError(
+                f"HTML validation failed for {len(errors)} issue(s):\n" +
+                "\n".join(errors)
+            )
+
+        logger.info(f"All {len(html_files)} HTML files validated successfully")
+
+    def validate_docx_artifacts(self, build_dir: Path):
+        """
+        Validate DOCX files for embedded images.
+        DOCX files are ZIP archives containing XML and media files.
+        """
+        import zipfile
+
+        logger.info("Validating DOCX artifacts...")
+
+        docx_files = list(build_dir.glob("**/*.docx"))
+
+        if not docx_files:
+            logger.warning("No DOCX files found to validate")
+            return
+
+        errors = []
+        for docx_file in docx_files:
+            try:
+                # DOCX is a ZIP file - check if it has media folder with images
+                with zipfile.ZipFile(docx_file, 'r') as zip_ref:
+                    file_list = zip_ref.namelist()
+
+                    # Check for media files (images are stored in word/media/)
+                    media_files = [f for f in file_list if f.startswith('word/media/')]
+
+                    if not media_files:
+                        # This might be okay if the document has no images
+                        logger.debug(f"{docx_file.name}: No embedded images found (this may be expected)")
+                    else:
+                        logger.debug(f"{docx_file.name}: Found {len(media_files)} embedded media file(s)")
+
+            except zipfile.BadZipFile:
+                errors.append(f"{docx_file.name}: File is not a valid DOCX (corrupted ZIP)")
+                logger.error(f"DOCX validation failed for {docx_file}: Not a valid ZIP file")
+            except Exception as e:
+                errors.append(f"{docx_file.name}: Validation error: {e}")
+                logger.error(f"DOCX validation failed for {docx_file}: {e}")
+
+        if errors:
+            raise ValueError(
+                f"DOCX validation failed for {len(errors)} issue(s):\n" +
+                "\n".join(errors)
+            )
+
+        logger.info(f"All {len(docx_files)} DOCX files validated successfully")
