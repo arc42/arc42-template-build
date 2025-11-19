@@ -144,10 +144,12 @@ build:
   create_zips: false  # Disabled for now during development
   # Verify required fonts are installed
   verify_fonts: true
-  # Output directories (relative to project root)
-  output_dir: "workspace/build"
-  dist_dir: "workspace/dist"
-  log_dir: "workspace/logs"
+  # Output directories
+  # Inside Docker container, working directory is /workspace, so paths are relative to that
+  # Outside Docker, paths are relative to project root
+  output_dir: "build"
+  dist_dir: "dist"
+  log_dir: "logs"
 
 # Logging configuration
 logging:
