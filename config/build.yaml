@@ -99,7 +99,7 @@ formats:
       optimize_for_github: true
 
   confluence:
-    enabled: true
+    enabled: false  # Disabled: asciidoctor-confluence gem not available
     priority: 2
     options: {}
       # Confluence-specific XHTML dialect

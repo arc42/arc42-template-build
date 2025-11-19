@@ -62,7 +62,15 @@ class PdfConverter(ConverterPlugin):
             if theme_file and theme_file.exists():
                 logger.info(f"Using default PDF theme: {theme_file.name} for language {context.language}")
                 attributes['pdf-theme'] = str(theme_file.absolute())
-                # Fonts are already in system paths, no need to specify pdf-fontsdir
+                # Point to system font directories so Asciidoctor PDF can find fonts
+                system_font_dirs = [
+                    "/usr/share/fonts/truetype/liberation",
+                    "/usr/share/fonts/truetype/dejavu",
+                    "/usr/share/fonts/truetype/noto",
+                    "/usr/share/fonts/truetype/custom",
+                    "GEM_FONTS_DIR"
+                ]
+                attributes['pdf-fontsdir'] = ";".join(system_font_dirs)
             else:
                 logger.warning(f"No PDF theme found for {context.language}. Using Asciidoctor PDF defaults.")
 
