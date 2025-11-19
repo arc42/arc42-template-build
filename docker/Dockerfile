@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
     # ============ COMPREHENSIVE FONT INSTALLATION ============ \
     # Core Latin fonts (EN, DE, CZ base support)
     fonts-liberation \
-    fonts-dejavu-core \
+    fonts-dejavu \
     fonts-liberation2 \
     # Noto fonts - Google's comprehensive Unicode font family
     fonts-noto-core \
@@ -67,12 +67,16 @@ RUN gem install asciidoctor:2.0.20 \
 # This allows adding commercial or special fonts not in Ubuntu repos
 COPY docker/custom-fonts/ /usr/share/fonts/truetype/custom/
 COPY docker/pdf-themes/ /opt/arc42/pdf-themes/
+COPY docker/check-installed-fonts.sh /usr/local/bin/check-fonts
 
-# Rebuild font cache with custom fonts
+# Rebuild font cache with custom fonts and verify installation
 RUN fc-cache -f -v && \
-    # Verify critical fonts are installed
-    fc-list | grep -i noto > /tmp/font-check.txt && \
-    echo "Installed Noto fonts:" && cat /tmp/font-check.txt
+    chmod +x /usr/local/bin/check-fonts && \
+    echo "=== Font Installation Verification ===" && \
+    /usr/local/bin/check-fonts && \
+    echo "" && \
+    echo "=== Font Cache Status ===" && \
+    fc-list | wc -l && echo "fonts registered with fontconfig"
 
 # Stage 2: Python environment
 FROM base AS python-env

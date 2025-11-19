@@ -7,25 +7,26 @@ extends: default
 font:
   catalog:
     # Primary font family - Liberation Sans (clean, professional)
+    # Using absolute paths to Ubuntu 22.04 system fonts
     Liberation:
-      normal: LiberationSans-Regular.ttf
-      bold: LiberationSans-Bold.ttf
-      italic: LiberationSans-Italic.ttf
-      bold_italic: LiberationSans-BoldItalic.ttf
+      normal: /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf
+      bold: /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf
+      italic: /usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf
+      bold_italic: /usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf
 
     # Fallback font family - DejaVu Sans (excellent Unicode coverage)
     DejaVu:
-      normal: DejaVuSans.ttf
-      bold: DejaVuSans-Bold.ttf
-      italic: DejaVuSans-Oblique.ttf
-      bold_italic: DejaVuSans-BoldOblique.ttf
+      normal: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+      bold: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+      italic: /usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf
+      bold_italic: /usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf
 
     # Monospace font for code blocks
     LiberationMono:
-      normal: LiberationMono-Regular.ttf
-      bold: LiberationMono-Bold.ttf
-      italic: LiberationMono-Italic.ttf
-      bold_italic: LiberationMono-BoldItalic.ttf
+      normal: /usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf
+      bold: /usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf
+      italic: /usr/share/fonts/truetype/liberation/LiberationMono-Italic.ttf
+      bold_italic: /usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf
 
   fallbacks:
     - DejaVu

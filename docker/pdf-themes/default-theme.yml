@@ -7,25 +7,26 @@ extends: default
 font:
   catalog:
     # Noto Sans - Google's comprehensive Unicode font
+    # Using absolute paths to Ubuntu 22.04 system fonts
     Noto:
-      normal: NotoSans-Regular.ttf
-      bold: NotoSans-Bold.ttf
-      italic: NotoSans-Italic.ttf
-      bold_italic: NotoSans-BoldItalic.ttf
+      normal: /usr/share/fonts/truetype/noto/NotoSans-Regular.ttf
+      bold: /usr/share/fonts/truetype/noto/NotoSans-Bold.ttf
+      italic: /usr/share/fonts/truetype/noto/NotoSans-Italic.ttf
+      bold_italic: /usr/share/fonts/truetype/noto/NotoSans-BoldItalic.ttf
 
     # DejaVu as fallback
     DejaVu:
-      normal: DejaVuSans.ttf
-      bold: DejaVuSans-Bold.ttf
-      italic: DejaVuSans-Oblique.ttf
-      bold_italic: DejaVuSans-BoldOblique.ttf
+      normal: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+      bold: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+      italic: /usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf
+      bold_italic: /usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf
 
     # Monospace
     NotoMono:
-      normal: NotoSansMono-Regular.ttf
-      bold: NotoSansMono-Bold.ttf
-      italic: NotoSansMono-Regular.ttf
-      bold_italic: NotoSansMono-Bold.ttf
+      normal: /usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf
+      bold: /usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf
+      italic: /usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf
+      bold_italic: /usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf
 
   fallbacks:
     - DejaVu

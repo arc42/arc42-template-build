@@ -43,20 +43,28 @@ class PdfConverter(ConverterPlugin):
             attributes['show-help'] = ''
 
         # Theme detection with smart fallback strategy
-        # 1. Check for template-specific theme
+        # 1. Check for template-specific theme (highest priority)
         template_theme_path = context.source_dir / "pdf-theme" / f"{context.language.lower()}-theme.yml"
         template_fonts_dir = context.source_dir / "pdf-theme" / "fonts"
 
-        # TEMPORARY: Disable custom themes due to font file naming issues
-        # TODO: Fix font file paths in theme files to match actual Ubuntu font locations
-        use_custom_themes = False
+        # 2. Builder-provided themes (from Docker image)
+        builder_themes_dir = Path("/opt/arc42/pdf-themes")
 
-        if use_custom_themes and template_theme_path.exists():
+        if template_theme_path.exists():
             # Use template-specific theme (highest priority)
             logger.info(f"Using template-specific PDF theme: {template_theme_path}")
             attributes['pdf-theme'] = str(template_theme_path.absolute())
             if template_fonts_dir.exists():
                 attributes['pdf-fontsdir'] = str(template_fonts_dir.absolute())
+        elif builder_themes_dir.exists():
+            # Use builder-provided theme with script-based fallback
+            builder_theme_path = self._select_theme_for_language(context.language, builder_themes_dir)
+            if builder_theme_path.exists():
+                logger.info(f"Using builder-provided PDF theme: {builder_theme_path}")
+                attributes['pdf-theme'] = str(builder_theme_path.absolute())
+            else:
+                # Use Asciidoctor PDF default theme
+                logger.info(f"Using Asciidoctor PDF default theme for language {context.language}")
         else:
             # Use Asciidoctor PDF default theme
             # The built-in theme works with system fonts automatically
