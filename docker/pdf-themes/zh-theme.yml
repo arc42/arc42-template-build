@@ -7,26 +7,27 @@ extends: default
 font:
   catalog:
     # Primary font family - Noto Sans CJK SC (Simplified Chinese)
-    # Note: This font is large (~15MB) but provides excellent CJK coverage
+    # Note: Using WenQuanYi fonts as they have better TrueType support in Asciidoctor PDF
+    # Ubuntu 22.04 installs these via fonts-wqy-microhei and fonts-wqy-zenhei packages
     NotoSansCJK:
-      normal: NotoSansCJKsc-Regular.ttf
-      bold: NotoSansCJKsc-Bold.ttf
-      italic: NotoSansCJKsc-Regular.ttf
-      bold_italic: NotoSansCJKsc-Bold.ttf
+      normal: /usr/share/fonts/truetype/wqy/wqy-microhei.ttc
+      bold: /usr/share/fonts/truetype/wqy/wqy-microhei.ttc
+      italic: /usr/share/fonts/truetype/wqy/wqy-microhei.ttc
+      bold_italic: /usr/share/fonts/truetype/wqy/wqy-microhei.ttc
 
     # Fallback for Latin characters - Noto Sans
     Noto:
-      normal: NotoSans-Regular.ttf
-      bold: NotoSans-Bold.ttf
-      italic: NotoSans-Italic.ttf
-      bold_italic: NotoSans-BoldItalic.ttf
+      normal: /usr/share/fonts/truetype/noto/NotoSans-Regular.ttf
+      bold: /usr/share/fonts/truetype/noto/NotoSans-Bold.ttf
+      italic: /usr/share/fonts/truetype/noto/NotoSans-Italic.ttf
+      bold_italic: /usr/share/fonts/truetype/noto/NotoSans-BoldItalic.ttf
 
     # Monospace font for code blocks
     NotoMono:
-      normal: NotoSansMono-Regular.ttf
-      bold: NotoSansMono-Bold.ttf
-      italic: NotoSansMono-Regular.ttf
-      bold_italic: NotoSansMono-Bold.ttf
+      normal: /usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf
+      bold: /usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf
+      italic: /usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf
+      bold_italic: /usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf
 
   fallbacks:
     - Noto
