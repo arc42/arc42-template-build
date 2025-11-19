@@ -60,8 +60,8 @@ RUN apt-get update && apt-get install -y \
 # Install Asciidoctor and extensions with specific versions
 RUN gem install asciidoctor:2.0.20 \
     asciidoctor-pdf:2.3.10 \
-    asciidoctor-diagram:2.2.14 \
-    asciidoctor-confluence:0.0.2
+    asciidoctor-diagram:2.2.14
+    # Note: asciidoctor-confluence removed - gem not available/working
 
 # Copy custom PDF themes and fonts (if any)
 # This allows adding commercial or special fonts not in Ubuntu repos

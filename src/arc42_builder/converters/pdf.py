@@ -47,24 +47,20 @@ class PdfConverter(ConverterPlugin):
         template_theme_path = context.source_dir / "pdf-theme" / f"{context.language.lower()}-theme.yml"
         template_fonts_dir = context.source_dir / "pdf-theme" / "fonts"
 
-        # 2. Default themes location (in Docker image)
-        default_themes_dir = Path("/opt/arc42/pdf-themes")
+        # TEMPORARY: Disable custom themes due to font file naming issues
+        # TODO: Fix font file paths in theme files to match actual Ubuntu font locations
+        use_custom_themes = False
 
-        if template_theme_path.exists():
+        if use_custom_themes and template_theme_path.exists():
             # Use template-specific theme (highest priority)
             logger.info(f"Using template-specific PDF theme: {template_theme_path}")
             attributes['pdf-theme'] = str(template_theme_path.absolute())
             if template_fonts_dir.exists():
                 attributes['pdf-fontsdir'] = str(template_fonts_dir.absolute())
         else:
-            # Use default theme with script-based fallback
-            theme_file = self._select_theme_for_language(context.language, default_themes_dir)
-            if theme_file and theme_file.exists():
-                logger.info(f"Using default PDF theme: {theme_file.name} for language {context.language}")
-                attributes['pdf-theme'] = str(theme_file.absolute())
-                # Fonts are already in system paths, no need to specify pdf-fontsdir
-            else:
-                logger.warning(f"No PDF theme found for {context.language}. Using Asciidoctor PDF defaults.")
+            # Use Asciidoctor PDF default theme
+            # The built-in theme works with system fonts automatically
+            logger.info(f"Using Asciidoctor PDF default theme for language {context.language}")
 
         # Add language-specific scripts
         if context.language in ['ZH', 'JA', 'KO']:
