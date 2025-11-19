@@ -52,7 +52,7 @@ That's it! Outputs will be in `workspace/build/`
 | Command | Description |
 |---------|-------------|
 | `make validate` | Run pre-build validation (inside Docker) |
-| `make test` | Run test suite (inside Docker) |
+| `make test` | Run test suite including format validation (inside Docker) |
 | `make test-build-artifacts` | Validate build artifacts for syntax and missing images |
 | `make dist` | Create ZIP distributions of build artifacts |
 | `make shell` | Open a shell in the container for debugging |
@@ -213,12 +213,17 @@ arc42-template-build/
 ├── docker/
 │   ├── Dockerfile         # Multi-stage Docker build
 │   ├── custom-fonts/      # Optional custom fonts
-│   └── pdf-themes/        # Optional PDF themes
+│   └── pdf-themes/        # Language-specific PDF themes (EN, UKR, ZH)
 ├── src/arc42_builder/     # Python build system
 │   ├── config/           # Configuration loading
 │   ├── converters/       # Format converter plugins
 │   ├── core/             # Build pipeline and validator
 │   └── cli.py            # Command-line interface
+├── tests/                 # Test suite
+│   ├── unit/             # Unit tests (config, converters)
+│   ├── validation/       # Format validation tests
+│   ├── utils/            # Test utilities (validators)
+│   └── conftest.py       # Pytest configuration
 ├── workspace/
 │   ├── build/            # Generated artifacts
 │   ├── dist/             # ZIP archives (if enabled)
@@ -265,13 +270,71 @@ See existing converters for examples.
 
 ### Running Tests
 
+The project includes comprehensive test coverage:
+
 ```bash
-# Run all tests
+# Run all tests (unit + validation)
 make test
 
 # Or run pytest directly in container
 docker compose run --rm builder pytest /app/tests -v
 ```
+
+**Test Suites:**
+
+1. **Unit Tests** (`tests/unit/`) - Fast, isolated tests
+   - Configuration schema validation
+   - Configuration loader tests
+   - Converter registry tests
+   - **36+ tests** covering core functionality
+
+2. **Format Validation Tests** (`tests/validation/`) - Syntax and structure validation
+   - HTML5 syntax validation
+   - PDF structure validation
+   - DOCX (Office Open XML) validation
+   - **Markdown purity tests** (ensures minimal HTML contamination)
+   - AsciiDoc syntax validation
+   - Confluence XHTML validation
+   - **20+ tests** validating all output formats
+
+**Running Specific Tests:**
+
+```bash
+# Unit tests only
+pytest tests/unit/ -v
+
+# Validation tests only
+pytest tests/validation/ -v
+pytest -m validation -v
+
+# Specific format validation
+pytest tests/validation/test_format_syntax.py::TestMarkdownSyntax -v
+pytest tests/validation/test_format_syntax.py::TestHTMLSyntax -v
+
+# Test with coverage report
+pytest tests/ --cov=src/arc42_builder --cov-report=html
+```
+
+**Prerequisites for Validation Tests:**
+
+Validation tests require build artifacts to exist:
+```bash
+# Build first, then validate
+make build
+make test
+```
+
+If no artifacts exist, validation tests will skip gracefully.
+
+**What Tests Validate:**
+
+- ✅ **Syntax correctness** - All formats conform to their specifications
+- ✅ **Required structure** - HTML has proper elements, PDFs have pages, etc.
+- ✅ **Content presence** - Documents have headings, paragraphs, reasonable size
+- ✅ **Format purity** - Markdown uses native syntax, not excessive HTML
+- ✅ **Cross-format consistency** - All enabled formats generate artifacts
+
+See [`tests/validation/README.md`](tests/validation/README.md) for detailed documentation.
 
 ---
 
@@ -339,6 +402,8 @@ Comprehensive documentation is available in the `docs/` directory:
 
 ### Reference Documentation
 
+- **Test Strategy**: [`docs/TEST_STRATEGY.md`](docs/TEST_STRATEGY.md) - Comprehensive testing approach
+- **Validation Tests**: [`tests/validation/README.md`](tests/validation/README.md) - Format validation guide
 - **Original Requirements**: [`todo/1-refined-arc42_build_process_requirements.md`](todo/1-refined-arc42_build_process_requirements.md)
 - **Solution Approach**: [`todo/4-updated-solution-approach.md`](todo/4-updated-solution-approach.md)
 - **Implementation Notes**: [`todo/5-configuration-system-implementation.md`](todo/5-configuration-system-implementation.md)
@@ -361,8 +426,10 @@ Contributions welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Make changes (all inside Docker, no local deps needed!)
-4. Run `make test` and `make validate`
-5. Submit a pull request
+4. Run `make build` to test your changes
+5. Run `make test` to ensure all tests pass (unit + validation)
+6. Run `make validate` for pre-build validation checks
+7. Submit a pull request
 
 ---
 
