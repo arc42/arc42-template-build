@@ -42,6 +42,9 @@ class DocxConverter(ConverterPlugin):
         asciidoctor_cmd = [
             "asciidoctor",
             "-b", "html5",
+            "-a", f"revnumber={context.version_props.get('revnumber', '')}",
+            "-a", f"revdate={context.version_props.get('revdate', '')}",
+            "-a", f"revremark={context.version_props.get('revremark', '')}",
             "-a", f"flavor={context.flavor}",
             # Use relative path to images directory
             "-a", "imagesdir=images",
